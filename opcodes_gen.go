@@ -12,7 +12,7 @@ the following conditions:
 
 The above copyright notice and this permission notice shall be
 included in all copies or substantial portions of the Software.
-8	 
+8
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -2047,6 +2047,7 @@ func instr__LD_BC_NNNN(z80 *Z80) {
 /* LD (BC),A */
 func instr__LD_iBC_A(z80 *Z80) {
 	z80.memory.WriteByte(z80.BC(), z80.A)
+	z80.memptr = (uint16(z80.A) << 8) | ((z80.BC() + 1) & 0xff)
 }
 
 /* INC BC */
@@ -2096,6 +2097,7 @@ func instr__ADD_HL_BC(z80 *Z80) {
 /* LD A,(BC) */
 func instr__LD_A_iBC(z80 *Z80) {
 	z80.A = z80.memory.ReadByte(z80.BC())
+	z80.memptr = z80.BC() + 1
 }
 
 /* DEC BC */
@@ -2151,6 +2153,7 @@ func instr__LD_DE_NNNN(z80 *Z80) {
 /* LD (DE),A */
 func instr__LD_iDE_A(z80 *Z80) {
 	z80.memory.WriteByte(z80.DE(), z80.A)
+	z80.memptr = (uint16(z80.A) << 8) | ((z80.DE() + 1) & 0xff)
 }
 
 /* INC DE */
@@ -2197,6 +2200,7 @@ func instr__ADD_HL_DE(z80 *Z80) {
 /* LD A,(DE) */
 func instr__LD_A_iDE(z80 *Z80) {
 	z80.A = z80.memory.ReadByte(z80.DE())
+	z80.memptr = z80.DE() + 1
 }
 
 /* DEC DE */
@@ -2374,6 +2378,7 @@ func instr__LD_iNNNN_A(z80 *Z80) {
 	wordtemp |= uint16(z80.memory.ReadByte(z80.PC())) << 8
 	z80.IncPC(1)
 	z80.memory.WriteByte(wordtemp, z80.A)
+	z80.memptr = (uint16(z80.A) << 8) | ((wordtemp + 1) & 0xff)
 }
 
 /* INC SP */
@@ -2438,6 +2443,7 @@ func instr__LD_A_iNNNN(z80 *Z80) {
 	wordtemp |= uint16(z80.memory.ReadByte(z80.PC())) << 8
 	z80.IncPC(1)
 	z80.A = z80.memory.ReadByte(wordtemp)
+	z80.memptr = wordtemp + 1
 }
 
 /* DEC SP */
@@ -3135,18 +3141,18 @@ func instr__POP_BC(z80 *Z80) {
 
 /* JP NZ,nnnn */
 func instr__JP_NZ_NNNN(z80 *Z80) {
-	if (z80.F & FLAG_Z) == 0 {
-		z80.jp()
-	} else {
-		z80.memory.ContendRead(z80.PC(), 3)
-		z80.memory.ContendRead(z80.PC()+1, 3)
-		z80.IncPC(2)
-	}
+	//	if (z80.F & FLAG_Z) == 0 {
+	z80.jp((z80.F & FLAG_Z) == 0)
+	//} else {
+	//z80.memory.ContendRead(z80.PC(), 3)
+	//z80.memory.ContendRead(z80.PC()+1, 3)
+	//z80.IncPC(2)
+	//}
 }
 
 /* JP nnnn */
 func instr__JP_NNNN(z80 *Z80) {
-	z80.jp()
+	z80.jp(true)
 }
 
 /* CALL NZ,nnnn */
@@ -3194,13 +3200,7 @@ func instr__RET(z80 *Z80) {
 
 /* JP Z,nnnn */
 func instr__JP_Z_NNNN(z80 *Z80) {
-	if (z80.F & FLAG_Z) != 0 {
-		z80.jp()
-	} else {
-		z80.memory.ContendRead(z80.PC(), 3)
-		z80.memory.ContendRead(z80.PC()+1, 3)
-		z80.IncPC(2)
-	}
+	z80.jp((z80.F & FLAG_Z) != 0)
 }
 
 /* shift CB */
@@ -3251,13 +3251,7 @@ func instr__POP_DE(z80 *Z80) {
 
 /* JP NC,nnnn */
 func instr__JP_NC_NNNN(z80 *Z80) {
-	if (z80.F & FLAG_C) == 0 {
-		z80.jp()
-	} else {
-		z80.memory.ContendRead(z80.PC(), 3)
-		z80.memory.ContendRead(z80.PC()+1, 3)
-		z80.IncPC(2)
-	}
+	z80.jp((z80.F & FLAG_C) == 0)
 }
 
 /* OUT (nn),A */
@@ -3322,13 +3316,7 @@ func instr__EXX(z80 *Z80) {
 
 /* JP C,nnnn */
 func instr__JP_C_NNNN(z80 *Z80) {
-	if (z80.F & FLAG_C) != 0 {
-		z80.jp()
-	} else {
-		z80.memory.ContendRead(z80.PC(), 3)
-		z80.memory.ContendRead(z80.PC()+1, 3)
-		z80.IncPC(2)
-	}
+	z80.jp((z80.F & FLAG_C) != 0)
 }
 
 /* IN A,(nn) */
@@ -3381,13 +3369,7 @@ func instr__POP_HL(z80 *Z80) {
 
 /* JP PO,nnnn */
 func instr__JP_PO_NNNN(z80 *Z80) {
-	if (z80.F & FLAG_P) == 0 {
-		z80.jp()
-	} else {
-		z80.memory.ContendRead(z80.PC(), 3)
-		z80.memory.ContendRead(z80.PC()+1, 3)
-		z80.IncPC(2)
-	}
+	z80.jp((z80.F & FLAG_P) == 0)
 }
 
 /* EX (SP),HL */
@@ -3400,6 +3382,7 @@ func instr__EX_iSP_HL(z80 *Z80) {
 	z80.memory.ContendWriteNoMreq_loop(z80.SP(), 1, 2)
 	z80.L = bytetempl
 	z80.H = bytetemph
+	z80.memptr = z80.HL()
 }
 
 /* CALL PO,nnnn */
@@ -3447,13 +3430,7 @@ func instr__JP_HL(z80 *Z80) {
 
 /* JP PE,nnnn */
 func instr__JP_PE_NNNN(z80 *Z80) {
-	if (z80.F & FLAG_P) != 0 {
-		z80.jp()
-	} else {
-		z80.memory.ContendRead(z80.PC(), 3)
-		z80.memory.ContendRead(z80.PC()+1, 3)
-		z80.IncPC(2)
-	}
+	z80.jp((z80.F & FLAG_P) != 0)
 }
 
 /* EX DE,HL */
@@ -3506,13 +3483,7 @@ func instr__POP_AF(z80 *Z80) {
 
 /* JP P,nnnn */
 func instr__JP_P_NNNN(z80 *Z80) {
-	if (z80.F & FLAG_S) == 0 {
-		z80.jp()
-	} else {
-		z80.memory.ContendRead(z80.PC(), 3)
-		z80.memory.ContendRead(z80.PC()+1, 3)
-		z80.IncPC(2)
-	}
+	z80.jp((z80.F & FLAG_S) == 0)
 }
 
 /* DI */
@@ -3566,13 +3537,7 @@ func instr__LD_SP_HL(z80 *Z80) {
 
 /* JP M,nnnn */
 func instr__JP_M_NNNN(z80 *Z80) {
-	if (z80.F & FLAG_S) != 0 {
-		z80.jp()
-	} else {
-		z80.memory.ContendRead(z80.PC(), 3)
-		z80.memory.ContendRead(z80.PC()+1, 3)
-		z80.IncPC(2)
-	}
+	z80.jp((z80.F & FLAG_S) != 0)
 }
 
 /* EI */
@@ -3990,7 +3955,7 @@ func instrCB__BIT_0_L(z80 *Z80) {
 func instrCB__BIT_0_iHL(z80 *Z80) {
 	bytetemp := z80.memory.ReadByte(z80.HL())
 	z80.memory.ContendReadNoMreq(z80.HL(), 1)
-	z80.bit(0, bytetemp)
+	z80.bit_memptr(0, bytetemp)
 }
 
 /* BIT 0,A */
@@ -4032,7 +3997,7 @@ func instrCB__BIT_1_L(z80 *Z80) {
 func instrCB__BIT_1_iHL(z80 *Z80) {
 	bytetemp := z80.memory.ReadByte(z80.HL())
 	z80.memory.ContendReadNoMreq(z80.HL(), 1)
-	z80.bit(1, bytetemp)
+	z80.bit_memptr(1, bytetemp)
 }
 
 /* BIT 1,A */
@@ -4074,7 +4039,7 @@ func instrCB__BIT_2_L(z80 *Z80) {
 func instrCB__BIT_2_iHL(z80 *Z80) {
 	bytetemp := z80.memory.ReadByte(z80.HL())
 	z80.memory.ContendReadNoMreq(z80.HL(), 1)
-	z80.bit(2, bytetemp)
+	z80.bit_memptr(2, bytetemp)
 }
 
 /* BIT 2,A */
@@ -4116,7 +4081,7 @@ func instrCB__BIT_3_L(z80 *Z80) {
 func instrCB__BIT_3_iHL(z80 *Z80) {
 	bytetemp := z80.memory.ReadByte(z80.HL())
 	z80.memory.ContendReadNoMreq(z80.HL(), 1)
-	z80.bit(3, bytetemp)
+	z80.bit_memptr(3, bytetemp)
 }
 
 /* BIT 3,A */
@@ -4158,7 +4123,7 @@ func instrCB__BIT_4_L(z80 *Z80) {
 func instrCB__BIT_4_iHL(z80 *Z80) {
 	bytetemp := z80.memory.ReadByte(z80.HL())
 	z80.memory.ContendReadNoMreq(z80.HL(), 1)
-	z80.bit(4, bytetemp)
+	z80.bit_memptr(4, bytetemp)
 }
 
 /* BIT 4,A */
@@ -4200,7 +4165,7 @@ func instrCB__BIT_5_L(z80 *Z80) {
 func instrCB__BIT_5_iHL(z80 *Z80) {
 	bytetemp := z80.memory.ReadByte(z80.HL())
 	z80.memory.ContendReadNoMreq(z80.HL(), 1)
-	z80.bit(5, bytetemp)
+	z80.bit_memptr(5, bytetemp)
 }
 
 /* BIT 5,A */
@@ -4242,7 +4207,7 @@ func instrCB__BIT_6_L(z80 *Z80) {
 func instrCB__BIT_6_iHL(z80 *Z80) {
 	bytetemp := z80.memory.ReadByte(z80.HL())
 	z80.memory.ContendReadNoMreq(z80.HL(), 1)
-	z80.bit(6, bytetemp)
+	z80.bit_memptr(6, bytetemp)
 }
 
 /* BIT 6,A */
@@ -4284,7 +4249,7 @@ func instrCB__BIT_7_L(z80 *Z80) {
 func instrCB__BIT_7_iHL(z80 *Z80) {
 	bytetemp := z80.memory.ReadByte(z80.HL())
 	z80.memory.ContendReadNoMreq(z80.HL(), 1)
-	z80.bit(7, bytetemp)
+	z80.bit_memptr(7, bytetemp)
 }
 
 /* BIT 7,A */
@@ -5137,6 +5102,7 @@ func instrED__RRD(z80 *Z80) {
 	z80.memory.WriteByte(z80.HL(), (z80.A<<4)|(bytetemp>>4))
 	z80.A = (z80.A & 0xf0) | (bytetemp & 0x0f)
 	z80.F = (z80.F & FLAG_C) | sz53pTable[z80.A]
+	z80.memptr = z80.HL() + 1
 }
 
 /* IN L,(C) */
@@ -5168,6 +5134,7 @@ func instrED__RLD(z80 *Z80) {
 	z80.memory.WriteByte(z80.HL(), (bytetemp<<4)|(z80.A&0x0f))
 	z80.A = (z80.A & 0xf0) | (bytetemp >> 4)
 	z80.F = (z80.F & FLAG_C) | sz53pTable[z80.A]
+	z80.memptr = z80.HL() + 1
 }
 
 /* IN F,(C) */
@@ -5369,6 +5336,9 @@ func instrED__CPIR(z80 *Z80) {
 	if (z80.F & (FLAG_V | FLAG_Z)) == FLAG_V {
 		z80.memory.ContendReadNoMreq_loop(z80.HL(), 1, 5)
 		z80.DecPC(2)
+		z80.memptr = z80.pc + 1
+	} else {
+		z80.memptr++
 	}
 	z80.IncHL()
 }
@@ -5444,6 +5414,9 @@ func instrED__CPDR(z80 *Z80) {
 	if (z80.F & (FLAG_V | FLAG_Z)) == FLAG_V {
 		z80.memory.ContendReadNoMreq_loop(z80.HL(), 1, 5)
 		z80.DecPC(2)
+		z80.memptr = z80.pc + 1
+	} else {
+		z80.memptr--
 	}
 	z80.DecHL()
 }
@@ -5545,6 +5518,7 @@ func instrDD__LD_REGH_NN(z80 *Z80) {
 /* ADD ix,ix */
 func instrDD__ADD_REG_REG(z80 *Z80) {
 	z80.memory.ContendReadNoMreq_loop(z80.IR(), 1, 7)
+	z80.memptr = z80.IX()
 	z80.add16(z80.ix, z80.IX())
 }
 
@@ -6017,6 +5991,7 @@ func instrDD__EX_iSP_REG(z80 *Z80) {
 	z80.memory.ContendWriteNoMreq_loop(z80.SP(), 1, 2)
 	z80.IXL = bytetempl
 	z80.IXH = bytetemph
+	z80.memptr = z80.IX()
 }
 
 /* PUSH ix */
@@ -6088,6 +6063,7 @@ func instrFD__LD_REGH_NN(z80 *Z80) {
 /* ADD iy,iy */
 func instrFD__ADD_REG_REG(z80 *Z80) {
 	z80.memory.ContendReadNoMreq_loop(z80.IR(), 1, 7)
+	z80.memptr = z80.IY()
 	z80.add16(z80.iy, z80.IY())
 }
 
@@ -6560,6 +6536,7 @@ func instrFD__EX_iSP_REG(z80 *Z80) {
 	z80.memory.ContendWriteNoMreq_loop(z80.SP(), 1, 2)
 	z80.IYL = bytetempl
 	z80.IYH = bytetemph
+	z80.memptr = z80.IY()
 }
 
 /* PUSH iy */

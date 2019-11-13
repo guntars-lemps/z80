@@ -17,22 +17,22 @@ var overflowSubTable = []byte{0, FLAG_V, 0, 0, 0, 0, FLAG_V, 0}
 var sz53Table, sz53pTable, parityTable [0x100]byte
 
 func init() {
-	var i int16
-	var j, k byte
-	var parity byte
+    var i int16
+    var j, k byte
+    var parity byte
 
-	for i = 0; i < 0x100; i++ {
-		sz53Table[i] = byte(i) & (0x08 | 0x20 | 0x80)
-		j = byte(i)
-		parity = 0
-		for k = 0; k < 8; k++ {
-			parity ^= j & 1
-			j >>= 1
-		}
-		parityTable[i] = ternOpB(parity != 0, 0, 0x04)
-		sz53pTable[i] = sz53Table[i] | parityTable[i]
-	}
+    for i = 0; i < 0x100; i++ {
+        sz53Table[i] = byte(i) & (0x08 | 0x20 | 0x80)
+        j = byte(i)
+        parity = 0
+        for k = 0; k < 8; k++ {
+            parity ^= j & 1
+            j >>= 1
+        }
+        parityTable[i] = ternOpB(parity != 0, 0, 0x04)
+        sz53pTable[i] = sz53Table[i] | parityTable[i]
+    }
 
-	sz53Table[0] |= 0x40
-	sz53pTable[0] |= 0x40
+    sz53Table[0] |= 0x40
+    sz53pTable[0] |= 0x40
 }

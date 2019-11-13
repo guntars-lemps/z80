@@ -40,7 +40,7 @@ const FLAG_Z = 0x40
 const FLAG_S = 0x80
 
 var (
-	OpcodesMap [1536]func(z80 *Z80)
+	OpcodesMap    [1536]func(z80 *Z80)
 	OpcodesDisMap [1536]func(memory MemoryReader, address uint16, shift int) (string, uint16, int)
 )
 
@@ -88,7 +88,7 @@ type Z80 struct {
 	// also act as an RZX instruction counter.
 	R uint16
 
-	sp, pc uint16
+	sp, pc, memptr uint16
 
 	bc, bc_, hl, hl_, af, de, de_, ix, iy register16
 
@@ -106,8 +106,8 @@ type Z80 struct {
 
 	interruptsEnabledAt int
 
-	memory          MemoryAccessor
-	ports           PortAccessor
+	memory MemoryAccessor
+	ports  PortAccessor
 
 	rzxInstructionsOffset int
 }
@@ -129,11 +129,13 @@ func NewZ80(memory MemoryAccessor, ports PortAccessor) *Z80 {
 
 // Reset resets the Z80.
 func (z80 *Z80) Reset() {
-	z80.A, z80.F, z80.B, z80.C, z80.D, z80.E, z80.H, z80.L = 0, 0, 0, 0, 0, 0, 0, 0
+	z80.A, z80.F = 0xff, 0xff
+	z80.B, z80.C, z80.D, z80.E, z80.H, z80.L = 0, 0, 0, 0, 0, 0
 	z80.A_, z80.F_, z80.B_, z80.C_, z80.D_, z80.E_, z80.H_, z80.L_ = 0, 0, 0, 0, 0, 0, 0, 0
 	z80.IXH, z80.IXL, z80.IYH, z80.IYL = 0, 0, 0, 0
 
-	z80.sp, z80.I, z80.R, z80.R7, z80.pc, z80.IFF1, z80.IFF2, z80.IM = 0, 0, 0, 0, 0, 0, 0, 0
+	z80.sp = 0xffff
+	z80.I, z80.R, z80.R7, z80.pc, z80.memptr, z80.IFF1, z80.IFF2, z80.IM = 0, 0, 0, 0, 0, 0, 0, 0
 
 	z80.Tstates = 0
 
@@ -185,6 +187,7 @@ func (z80 *Z80) Interrupt() {
 		default:
 			panic("Unknown interrupt mode")
 		}
+		z80.memptr = z80.pc
 	}
 }
 
@@ -224,12 +227,16 @@ func signExtend(v byte) int16 {
 	return int16(int8(v))
 }
 
-func (z80 *Z80) jp() {
+func (z80 *Z80) jp(cond bool) {
 	var jptemp uint16 = z80.pc
-	pcl := z80.memory.ReadByte(jptemp)
+	z80.memptr = uint16(z80.memory.ReadByte(jptemp))
 	jptemp++
-	pch := z80.memory.ReadByte(jptemp)
-	z80.pc = joinBytes(pch, pcl)
+	z80.memptr = z80.memptr | (uint16(z80.memory.ReadByte(jptemp)) << 8)
+	if cond {
+		z80.pc = z80.memptr
+	} else {
+		z80.pc = jptemp + 1
+	}
 }
 
 func (z80 *Z80) dec(value *byte) {
@@ -247,6 +254,8 @@ func (z80 *Z80) jr() {
 	var jrtemp int16 = signExtend(z80.memory.ReadByte(z80.pc))
 	z80.memory.ContendReadNoMreq_loop(z80.pc, 1, 5)
 	z80.pc += uint16(jrtemp)
+	// fuse: z80.pc ++ ???
+	z80.memptr = z80.pc + 1
 }
 
 func (z80 *Z80) ld16nnrr(regl, regh byte) {
@@ -256,9 +265,11 @@ func (z80 *Z80) ld16nnrr(regl, regh byte) {
 	z80.pc++
 	ldtemp |= uint16(z80.memory.ReadByte(z80.pc)) << 8
 	z80.pc++
+	z80.memptr = ldtemp
 	z80.memory.WriteByte(ldtemp, regl)
 	ldtemp++
 	z80.memory.WriteByte(ldtemp, regh)
+	z80.memptr = ldtemp
 }
 
 func (z80 *Z80) ld16rrnn(regl, regh *byte) {
@@ -271,6 +282,7 @@ func (z80 *Z80) ld16rrnn(regl, regh *byte) {
 	*regl = z80.memory.ReadByte(ldtemp)
 	ldtemp++
 	*regh = z80.memory.ReadByte(ldtemp)
+	z80.memptr = ldtemp
 }
 
 func (z80 *Z80) sub(value byte) {
@@ -300,6 +312,8 @@ func (z80 *Z80) adc16(value uint16) {
 	var add16temp uint = uint(z80.HL()) + uint(value) + (uint(z80.F) & FLAG_C)
 	var lookup byte = byte(((uint(z80.HL()) & 0x8800) >> 11) | ((uint(value) & 0x8800) >> 10) | (add16temp&0x8800)>>9)
 
+	//z80.memptr = z80.HL() + 1
+
 	z80.SetHL(uint16(add16temp))
 
 	z80.F = ternOpB((uint(add16temp)&0x10000) != 0, FLAG_C, 0) | overflowAddTable[lookup>>4] | (z80.H & (FLAG_3 | FLAG_5 | FLAG_S)) | halfcarryAddTable[lookup&0x07] | ternOpB(z80.HL() != 0, 0, FLAG_Z)
@@ -308,6 +322,8 @@ func (z80 *Z80) adc16(value uint16) {
 func (z80 *Z80) add16(value1 register16, value2 uint16) {
 	var add16temp uint = uint(value1.get()) + uint(value2)
 	var lookup byte = byte(((value1.get() & 0x0800) >> 11) | ((value2 & 0x0800) >> 10) | (uint16(add16temp)&0x0800)>>9)
+
+	z80.memptr = value1.get() + 1
 
 	value1.set(uint16(add16temp))
 
@@ -344,6 +360,7 @@ func (z80 *Z80) push16(regl, regh byte) {
 func (z80 *Z80) ret() {
 	pcl, pch := z80.pop16()
 	z80.pc = joinBytes(pch, pcl)
+	z80.memptr = z80.pc
 }
 
 func (z80 *Z80) rl(value byte) byte {
@@ -377,6 +394,7 @@ func (z80 *Z80) rst(value byte) {
 	pch, pcl := splitWord(z80.pc)
 	z80.push16(pcl, pch)
 	z80.pc = uint16(value)
+	z80.memptr = z80.pc
 }
 
 func (z80 *Z80) sbc(value byte) {
@@ -389,6 +407,8 @@ func (z80 *Z80) sbc(value byte) {
 func (z80 *Z80) sbc16(value uint16) {
 	var sub16temp uint = uint(z80.HL()) - uint(value) - (uint(z80.F) & FLAG_C)
 	var lookup byte = byte(((z80.HL() & 0x8800) >> 11) | ((uint16(value) & 0x8800) >> 10) | ((uint16(sub16temp) & 0x8800) >> 9))
+
+	//z80.memptr = z80.HL() + 1
 
 	z80.SetHL(uint16(sub16temp))
 
@@ -438,6 +458,16 @@ func (z80 *Z80) bit(bit, value byte) {
 	}
 }
 
+func (z80 *Z80) bit_memptr(bit, value byte) {
+	z80.F = (z80.F & FLAG_C) | FLAG_H | (byte(z80.memptr>>8) & (FLAG_3 | FLAG_5))
+	if value&(0x01<<bit) == 0 {
+		z80.F |= FLAG_P | FLAG_Z
+	}
+	if bit == 7 && (value&0x80) != 0 {
+		z80.F |= FLAG_S
+	}
+}
+
 func (z80 *Z80) biti(bit, value byte, address uint16) {
 	z80.F = (z80.F & FLAG_C) | FLAG_H | (byte(address>>8) & (FLAG_3 | FLAG_5))
 	if value&(0x01<<bit) == 0 {
@@ -458,6 +488,7 @@ func (z80 *Z80) call() {
 	pch, pcl := splitWord(z80.pc)
 	z80.push16(pcl, pch)
 	z80.pc = joinBytes(calltemph, calltempl)
+	z80.memptr = z80.pc
 }
 
 func (z80 *Z80) cp(value byte) {
@@ -467,6 +498,7 @@ func (z80 *Z80) cp(value byte) {
 }
 
 func (z80 *Z80) in(reg *byte, port uint16) {
+	z80.memptr = port + 1
 	*reg = z80.readPort(port)
 	z80.F = (z80.F & FLAG_C) | sz53pTable[*reg]
 }
