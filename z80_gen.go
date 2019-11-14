@@ -25,12 +25,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package z80
 
-//
-// Automatically generated file -- DO NOT EDIT
-//
-
-// Generated INC/DEC functions for 8bit registers
-
 func (z80 *Z80) incA() {
 	z80.A++
 	z80.F = (z80.F & FLAG_C) | (ternOpB(z80.A == 0x80, FLAG_V, 0)) | (ternOpB((z80.A&0x0f) != 0, 0, FLAG_H)) | sz53Table[z80.A]

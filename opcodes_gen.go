@@ -23,10 +23,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-//
-// Automatically generated file -- DO NOT EDIT
-//
-
 package z80
 
 func initOpcodes() {
@@ -2075,8 +2071,7 @@ func instr__LD_B_NN(z80 *Z80) {
 /* RLCA */
 func instr__RLCA(z80 *Z80) {
 	z80.A = (z80.A << 1) | (z80.A >> 7)
-	z80.F = (z80.F & (FLAG_P | FLAG_Z | FLAG_S)) |
-		(z80.A & (FLAG_C | FLAG_3 | FLAG_5))
+	z80.F = (z80.F & (FLAG_P | FLAG_Z | FLAG_S)) | (z80.A & (FLAG_C | FLAG_3 | FLAG_5))
 }
 
 /* EX AF,AF' */
@@ -2418,6 +2413,13 @@ func instr__SCF(z80 *Z80) {
 	z80.F = (z80.F & (FLAG_P | FLAG_Z | FLAG_S)) |
 		(z80.A & (FLAG_3 | FLAG_5)) |
 		FLAG_C
+
+	/*
+				 F = ( F & ( FLAG_P | FLAG_Z | FLAG_S ) ) |
+		          ( ( IS_CMOS ? A : ( ( last_Q ^ F ) | A ) ) & ( FLAG_3 | FLAG_5 ) ) |
+		          FLAG_C;
+		      Q = F;
+	*/
 }
 
 /* JR C,offset */
@@ -2473,6 +2475,15 @@ func instr__CCF(z80 *Z80) {
 	z80.F = (z80.F & (FLAG_P | FLAG_Z | FLAG_S)) |
 		ternOpB((z80.F&FLAG_C) != 0, FLAG_H, FLAG_C) |
 		(z80.A & (FLAG_3 | FLAG_5))
+
+	/*
+			 F = ( F & ( FLAG_P | FLAG_Z | FLAG_S ) ) |
+	          ( ( F & FLAG_C ) ? FLAG_H : FLAG_C ) |
+	          ( ( IS_CMOS ? A : ( ( last_Q ^ F ) | A ) ) & ( FLAG_3 | FLAG_5 ) );
+	      Q = F;
+
+	*/
+
 }
 
 /* LD B,B */
@@ -3141,13 +3152,7 @@ func instr__POP_BC(z80 *Z80) {
 
 /* JP NZ,nnnn */
 func instr__JP_NZ_NNNN(z80 *Z80) {
-	//	if (z80.F & FLAG_Z) == 0 {
 	z80.jp((z80.F & FLAG_Z) == 0)
-	//} else {
-	//z80.memory.ContendRead(z80.PC(), 3)
-	//z80.memory.ContendRead(z80.PC()+1, 3)
-	//z80.IncPC(2)
-	//}
 }
 
 /* JP nnnn */
@@ -3157,13 +3162,7 @@ func instr__JP_NNNN(z80 *Z80) {
 
 /* CALL NZ,nnnn */
 func instr__CALL_NZ_NNNN(z80 *Z80) {
-	if (z80.F & FLAG_Z) == 0 {
-		z80.call()
-	} else {
-		z80.memory.ContendRead(z80.PC(), 3)
-		z80.memory.ContendRead(z80.PC()+1, 3)
-		z80.IncPC(2)
-	}
+	z80.call((z80.F & FLAG_Z) == 0)
 }
 
 /* PUSH BC */
@@ -3209,18 +3208,12 @@ func instr__SHIFT_CB(z80 *Z80) {
 
 /* CALL Z,nnnn */
 func instr__CALL_Z_NNNN(z80 *Z80) {
-	if (z80.F & FLAG_Z) != 0 {
-		z80.call()
-	} else {
-		z80.memory.ContendRead(z80.PC(), 3)
-		z80.memory.ContendRead(z80.PC()+1, 3)
-		z80.IncPC(2)
-	}
+	z80.call((z80.F & FLAG_Z) != 0)
 }
 
 /* CALL nnnn */
 func instr__CALL_NNNN(z80 *Z80) {
-	z80.call()
+	z80.call(true)
 }
 
 /* ADC A,nn */
@@ -3256,20 +3249,16 @@ func instr__JP_NC_NNNN(z80 *Z80) {
 
 /* OUT (nn),A */
 func instr__OUT_iNN_A(z80 *Z80) {
-	var outtemp uint16 = uint16(z80.memory.ReadByte(z80.PC())) + (uint16(z80.A) << 8)
+	var port byte = z80.memory.ReadByte(z80.PC())
+	var outtemp uint16 = uint16(port) + (uint16(z80.A) << 8)
+	z80.memptr = (uint16(z80.A) << 8) | uint16(port+1)
 	z80.IncPC(1)
 	z80.writePort(outtemp, z80.A)
 }
 
 /* CALL NC,nnnn */
 func instr__CALL_NC_NNNN(z80 *Z80) {
-	if (z80.F & FLAG_C) == 0 {
-		z80.call()
-	} else {
-		z80.memory.ContendRead(z80.PC(), 3)
-		z80.memory.ContendRead(z80.PC()+1, 3)
-		z80.IncPC(2)
-	}
+	z80.call((z80.F & FLAG_C) == 0)
 }
 
 /* PUSH DE */
@@ -3324,17 +3313,12 @@ func instr__IN_A_iNN(z80 *Z80) {
 	var intemp uint16 = uint16(z80.memory.ReadByte(z80.PC())) + (uint16(z80.A) << 8)
 	z80.IncPC(1)
 	z80.A = z80.readPort(intemp)
+	z80.memptr = intemp + 1
 }
 
 /* CALL C,nnnn */
 func instr__CALL_C_NNNN(z80 *Z80) {
-	if (z80.F & FLAG_C) != 0 {
-		z80.call()
-	} else {
-		z80.memory.ContendRead(z80.PC(), 3)
-		z80.memory.ContendRead(z80.PC()+1, 3)
-		z80.IncPC(2)
-	}
+	z80.call((z80.F & FLAG_C) != 0)
 }
 
 /* shift DD */
@@ -3387,13 +3371,7 @@ func instr__EX_iSP_HL(z80 *Z80) {
 
 /* CALL PO,nnnn */
 func instr__CALL_PO_NNNN(z80 *Z80) {
-	if (z80.F & FLAG_P) == 0 {
-		z80.call()
-	} else {
-		z80.memory.ContendRead(z80.PC(), 3)
-		z80.memory.ContendRead(z80.PC()+1, 3)
-		z80.IncPC(2)
-	}
+	z80.call((z80.F & FLAG_P) == 0)
 }
 
 /* PUSH HL */
@@ -3442,13 +3420,7 @@ func instr__EX_DE_HL(z80 *Z80) {
 
 /* CALL PE,nnnn */
 func instr__CALL_PE_NNNN(z80 *Z80) {
-	if (z80.F & FLAG_P) != 0 {
-		z80.call()
-	} else {
-		z80.memory.ContendRead(z80.PC(), 3)
-		z80.memory.ContendRead(z80.PC()+1, 3)
-		z80.IncPC(2)
-	}
+	z80.call((z80.F & FLAG_P) != 0)
 }
 
 /* shift ED */
@@ -3493,13 +3465,7 @@ func instr__DI(z80 *Z80) {
 
 /* CALL P,nnnn */
 func instr__CALL_P_NNNN(z80 *Z80) {
-	if (z80.F & FLAG_S) == 0 {
-		z80.call()
-	} else {
-		z80.memory.ContendRead(z80.PC(), 3)
-		z80.memory.ContendRead(z80.PC()+1, 3)
-		z80.IncPC(2)
-	}
+	z80.call((z80.F & FLAG_S) == 0)
 }
 
 /* PUSH AF */
@@ -3542,22 +3508,15 @@ func instr__JP_M_NNNN(z80 *Z80) {
 
 /* EI */
 func instr__EI(z80 *Z80) {
-	/* Interrupts are not accepted immediately after an EI, but are
-	   accepted after the next instruction */
+	// Interrupts are not accepted immediately after an EI,
+	// but are accepted after the next instruction
 	z80.IFF1, z80.IFF2 = 1, 1
 	z80.interruptsEnabledAt = int(z80.Tstates)
-	// eventAdd(z80.Tstates + 1, z80InterruptEvent)
 }
 
 /* CALL M,nnnn */
 func instr__CALL_M_NNNN(z80 *Z80) {
-	if (z80.F & FLAG_S) != 0 {
-		z80.call()
-	} else {
-		z80.memory.ContendRead(z80.PC(), 3)
-		z80.memory.ContendRead(z80.PC()+1, 3)
-		z80.IncPC(2)
-	}
+	z80.call((z80.F & FLAG_S) != 0)
 }
 
 /* shift FD */
@@ -5164,11 +5123,13 @@ func instrED__LD_iNNNN_SP(z80 *Z80) {
 /* IN A,(C) */
 func instrED__IN_A_iC(z80 *Z80) {
 	z80.in(&z80.A, z80.BC())
+	z80.memptr = z80.BC() + 1
 }
 
 /* OUT (C),A */
 func instrED__OUT_iC_A(z80 *Z80) {
 	z80.writePort(z80.BC(), z80.A)
+	z80.memptr = z80.BC() + 1
 }
 
 /* ADC HL,SP */
@@ -5213,6 +5174,7 @@ func instrED__CPI(z80 *Z80) {
 		bytetemp--
 	}
 	z80.F |= (bytetemp & FLAG_3) | ternOpB((bytetemp&0x02) != 0, FLAG_5, 0)
+	z80.memptr++
 }
 
 /* INI */
@@ -5220,7 +5182,7 @@ func instrED__INI(z80 *Z80) {
 	z80.memory.ContendReadNoMreq(z80.IR(), 1)
 	var initemp byte = z80.readPort(z80.BC())
 	z80.memory.WriteByte(z80.HL(), initemp)
-
+	z80.memptr = z80.BC() + 1
 	z80.B--
 	z80.IncHL()
 	var initemp2 byte = initemp + z80.C + 1
@@ -5235,6 +5197,7 @@ func instrED__OUTI(z80 *Z80) {
 	z80.memory.ContendReadNoMreq(z80.IR(), 1)
 	var outitemp byte = z80.memory.ReadByte(z80.HL())
 	z80.B-- /* This does happen first, despite what the specs say */
+	z80.memptr = z80.BC() + 1
 	z80.writePort(z80.BC(), outitemp)
 
 	z80.IncHL()
@@ -5273,6 +5236,7 @@ func instrED__CPD(z80 *Z80) {
 		bytetemp--
 	}
 	z80.F |= (bytetemp & FLAG_3) | ternOpB((bytetemp&0x02) != 0, FLAG_5, 0)
+	z80.memptr--
 }
 
 /* IND */
@@ -5280,7 +5244,7 @@ func instrED__IND(z80 *Z80) {
 	z80.memory.ContendReadNoMreq(z80.IR(), 1)
 	var initemp byte = z80.readPort(z80.BC())
 	z80.memory.WriteByte(z80.HL(), initemp)
-
+	z80.memptr = z80.BC() - 1
 	z80.B--
 	z80.DecHL()
 	var initemp2 byte = initemp + z80.C - 1
@@ -5295,6 +5259,7 @@ func instrED__OUTD(z80 *Z80) {
 	z80.memory.ContendReadNoMreq(z80.IR(), 1)
 	var outitemp byte = z80.memory.ReadByte(z80.HL())
 	z80.B-- /* This does happen first, despite what the specs say */
+	z80.memptr = z80.BC() - 1
 	z80.writePort(z80.BC(), outitemp)
 
 	z80.DecHL()
@@ -5316,6 +5281,7 @@ func instrED__LDIR(z80 *Z80) {
 	if z80.BC() != 0 {
 		z80.memory.ContendWriteNoMreq_loop(z80.DE(), 1, 5)
 		z80.DecPC(2)
+		z80.memptr = z80.pc + 1
 	}
 	z80.IncHL()
 	z80.IncDE()
@@ -5333,12 +5299,11 @@ func instrED__CPIR(z80 *Z80) {
 		bytetemp--
 	}
 	z80.F |= (bytetemp & FLAG_3) | ternOpB((bytetemp&0x02) != 0, FLAG_5, 0)
+	z80.memptr++
 	if (z80.F & (FLAG_V | FLAG_Z)) == FLAG_V {
 		z80.memory.ContendReadNoMreq_loop(z80.HL(), 1, 5)
 		z80.DecPC(2)
 		z80.memptr = z80.pc + 1
-	} else {
-		z80.memptr++
 	}
 	z80.IncHL()
 }
@@ -5348,7 +5313,7 @@ func instrED__INIR(z80 *Z80) {
 	z80.memory.ContendReadNoMreq(z80.IR(), 1)
 	var initemp byte = z80.readPort(z80.BC())
 	z80.memory.WriteByte(z80.HL(), initemp)
-
+	z80.memptr = z80.BC() + 1
 	z80.B--
 	var initemp2 byte = initemp + z80.C + 1
 	z80.F = ternOpB(initemp&0x80 != 0, FLAG_N, 0) |
@@ -5368,6 +5333,7 @@ func instrED__OTIR(z80 *Z80) {
 	z80.memory.ContendReadNoMreq(z80.IR(), 1)
 	var outitemp byte = z80.memory.ReadByte(z80.HL())
 	z80.B-- /* This does happen first, despite what the specs say */
+	z80.memptr = z80.BC() + 1
 	z80.writePort(z80.BC(), outitemp)
 
 	z80.IncHL()
@@ -5394,6 +5360,7 @@ func instrED__LDDR(z80 *Z80) {
 	if z80.BC() != 0 {
 		z80.memory.ContendWriteNoMreq_loop(z80.DE(), 1, 5)
 		z80.DecPC(2)
+		z80.memptr = z80.pc + 1
 	}
 	z80.DecHL()
 	z80.DecDE()
@@ -5411,12 +5378,11 @@ func instrED__CPDR(z80 *Z80) {
 		bytetemp--
 	}
 	z80.F |= (bytetemp & FLAG_3) | ternOpB((bytetemp&0x02) != 0, FLAG_5, 0)
+	z80.memptr--
 	if (z80.F & (FLAG_V | FLAG_Z)) == FLAG_V {
 		z80.memory.ContendReadNoMreq_loop(z80.HL(), 1, 5)
 		z80.DecPC(2)
 		z80.memptr = z80.pc + 1
-	} else {
-		z80.memptr--
 	}
 	z80.DecHL()
 }
@@ -5426,7 +5392,7 @@ func instrED__INDR(z80 *Z80) {
 	z80.memory.ContendReadNoMreq(z80.IR(), 1)
 	var initemp byte = z80.readPort(z80.BC())
 	z80.memory.WriteByte(z80.HL(), initemp)
-
+	z80.memptr = z80.BC() - 1
 	z80.B--
 	var initemp2 byte = initemp + z80.C - 1
 	z80.F = ternOpB(initemp&0x80 != 0, FLAG_N, 0) |
@@ -5446,6 +5412,7 @@ func instrED__OTDR(z80 *Z80) {
 	z80.memory.ContendReadNoMreq(z80.IR(), 1)
 	var outitemp byte = z80.memory.ReadByte(z80.HL())
 	z80.B-- /* This does happen first, despite what the specs say */
+	z80.memptr = z80.BC() - 1
 	z80.writePort(z80.BC(), outitemp)
 
 	z80.DecHL()
