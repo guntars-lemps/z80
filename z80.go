@@ -312,7 +312,7 @@ func (z80 *Z80) adc16(value uint16) {
 	var add16temp uint = uint(z80.HL()) + uint(value) + (uint(z80.F) & FLAG_C)
 	var lookup byte = byte(((uint(z80.HL()) & 0x8800) >> 11) | ((uint(value) & 0x8800) >> 10) | (add16temp&0x8800)>>9)
 
-	//z80.memptr = z80.HL() + 1
+	z80.memptr = z80.HL() + 1
 
 	z80.SetHL(uint16(add16temp))
 
@@ -408,7 +408,7 @@ func (z80 *Z80) sbc16(value uint16) {
 	var sub16temp uint = uint(z80.HL()) - uint(value) - (uint(z80.F) & FLAG_C)
 	var lookup byte = byte(((z80.HL() & 0x8800) >> 11) | ((uint16(value) & 0x8800) >> 10) | ((uint16(sub16temp) & 0x8800) >> 9))
 
-	//z80.memptr = z80.HL() + 1
+	z80.memptr = z80.HL() + 1
 
 	z80.SetHL(uint16(sub16temp))
 
@@ -478,17 +478,23 @@ func (z80 *Z80) biti(bit, value byte, address uint16) {
 	}
 }
 
-func (z80 *Z80) call() {
+func (z80 *Z80) call(cond bool) {
 	var calltempl, calltemph byte
-	calltempl = z80.memory.ReadByte(z80.pc)
-	z80.pc++
-	calltemph = z80.memory.ReadByte(z80.pc)
-	z80.memory.ContendReadNoMreq(z80.pc, 1)
-	z80.pc++
-	pch, pcl := splitWord(z80.pc)
-	z80.push16(pcl, pch)
-	z80.pc = joinBytes(calltemph, calltempl)
-	z80.memptr = z80.pc
+	if cond {
+		calltempl = z80.memory.ReadByte(z80.pc)
+		z80.pc++
+		calltemph = z80.memory.ReadByte(z80.pc)
+		z80.memory.ContendReadNoMreq(z80.pc, 1)
+		z80.pc++
+		pch, pcl := splitWord(z80.pc)
+		z80.push16(pcl, pch)
+		z80.pc = joinBytes(calltemph, calltempl)
+		z80.memptr = z80.pc
+	} else {
+		z80.memory.ContendRead(z80.PC(), 3)
+		z80.memory.ContendRead(z80.PC()+1, 3)
+		z80.IncPC(2)
+	}
 }
 
 func (z80 *Z80) cp(value byte) {
