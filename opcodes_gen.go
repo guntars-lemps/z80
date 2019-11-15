@@ -25,6 +25,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package z80
 
+import (
+	"fmt"
+)
+
 func initOpcodes() {
 	// BEGIN of non shifted opcodes
 	/* NOP */
@@ -2029,6 +2033,7 @@ func initOpcodes() {
 
 /* NOP */
 func instr__NOP(z80 *Z80) {
+	z80.Q = 0
 }
 
 /* LD BC,nnnn */
@@ -2038,40 +2043,47 @@ func instr__LD_BC_NNNN(z80 *Z80) {
 	b2 := z80.memory.ReadByte(z80.PC())
 	z80.IncPC(1)
 	z80.SetBC(joinBytes(b2, b1))
+	z80.Q = 0
 }
 
 /* LD (BC),A */
 func instr__LD_iBC_A(z80 *Z80) {
 	z80.memory.WriteByte(z80.BC(), z80.A)
 	z80.memptr = (uint16(z80.A) << 8) | ((z80.BC() + 1) & 0xff)
+	z80.Q = 0
 }
 
 /* INC BC */
 func instr__INC_BC(z80 *Z80) {
 	z80.memory.ContendReadNoMreq_loop(z80.IR(), 1, 2)
 	z80.IncBC()
+	z80.Q = 0
 }
 
 /* INC B */
 func instr__INC_B(z80 *Z80) {
 	z80.incB()
+	z80.Q = 0
 }
 
 /* DEC B */
 func instr__DEC_B(z80 *Z80) {
 	z80.decB()
+	z80.Q = 0
 }
 
 /* LD B,nn */
 func instr__LD_B_NN(z80 *Z80) {
 	z80.B = z80.memory.ReadByte(z80.PC())
 	z80.IncPC(1)
+	z80.Q = 0
 }
 
 /* RLCA */
 func instr__RLCA(z80 *Z80) {
 	z80.A = (z80.A << 1) | (z80.A >> 7)
 	z80.F = (z80.F & (FLAG_P | FLAG_Z | FLAG_S)) | (z80.A & (FLAG_C | FLAG_3 | FLAG_5))
+	z80.Q = z80.F
 }
 
 /* EX AF,AF' */
@@ -2081,6 +2093,7 @@ func instr__EX_AF_AF(z80 *Z80) {
 	z80.F = z80.F_
 	z80.A_ = olda
 	z80.F_ = oldf
+	z80.Q = 0
 }
 
 /* ADD HL,BC */
@@ -2122,6 +2135,7 @@ func instr__RRCA(z80 *Z80) {
 	z80.F = (z80.F & (FLAG_P | FLAG_Z | FLAG_S)) | (z80.A & FLAG_C)
 	z80.A = (z80.A >> 1) | (z80.A << 7)
 	z80.F |= (z80.A & (FLAG_3 | FLAG_5))
+	z80.Q = z80.F
 }
 
 /* DJNZ offset */
@@ -2178,6 +2192,7 @@ func instr__RLA(z80 *Z80) {
 	var bytetemp byte = z80.A
 	z80.A = (z80.A << 1) | (z80.F & FLAG_C)
 	z80.F = (z80.F & (FLAG_P | FLAG_Z | FLAG_S)) | (z80.A & (FLAG_3 | FLAG_5)) | (bytetemp >> 7)
+	z80.Q = z80.F
 }
 
 /* JR offset */
@@ -2225,6 +2240,7 @@ func instr__RRA(z80 *Z80) {
 	var bytetemp byte = z80.A
 	z80.A = (z80.A >> 1) | (z80.F << 7)
 	z80.F = (z80.F & (FLAG_P | FLAG_Z | FLAG_S)) | (z80.A & (FLAG_3 | FLAG_5)) | (bytetemp & FLAG_C)
+	z80.Q = z80.F
 }
 
 /* JR NZ,offset */
@@ -2293,6 +2309,7 @@ func instr__DAA(z80 *Z80) {
 	}
 	var temp byte = byte(int(z80.F) & ^(FLAG_C|FLAG_P)) | carry | parityTable[z80.A]
 	z80.F = temp
+	z80.Q = z80.F
 }
 
 /* JR Z,offset */
@@ -2345,6 +2362,7 @@ func instr__CPL(z80 *Z80) {
 	z80.F = (z80.F & (FLAG_C | FLAG_P | FLAG_Z | FLAG_S)) |
 		(z80.A & (FLAG_3 | FLAG_5)) |
 		(FLAG_N | FLAG_H)
+	z80.Q = z80.F
 }
 
 /* JR NC,offset */
@@ -2411,15 +2429,9 @@ func instr__LD_iHL_NN(z80 *Z80) {
 /* SCF */
 func instr__SCF(z80 *Z80) {
 	z80.F = (z80.F & (FLAG_P | FLAG_Z | FLAG_S)) |
-		(z80.A & (FLAG_3 | FLAG_5)) |
+		(((z80.Q ^ z80.F) | z80.A) & (FLAG_3 | FLAG_5)) |
 		FLAG_C
-
-	/*
-				 F = ( F & ( FLAG_P | FLAG_Z | FLAG_S ) ) |
-		          ( ( IS_CMOS ? A : ( ( last_Q ^ F ) | A ) ) & ( FLAG_3 | FLAG_5 ) ) |
-		          FLAG_C;
-		      Q = F;
-	*/
+	z80.Q = z80.F
 }
 
 /* JR C,offset */
@@ -2474,16 +2486,8 @@ func instr__LD_A_NN(z80 *Z80) {
 func instr__CCF(z80 *Z80) {
 	z80.F = (z80.F & (FLAG_P | FLAG_Z | FLAG_S)) |
 		ternOpB((z80.F&FLAG_C) != 0, FLAG_H, FLAG_C) |
-		(z80.A & (FLAG_3 | FLAG_5))
-
-	/*
-			 F = ( F & ( FLAG_P | FLAG_Z | FLAG_S ) ) |
-	          ( ( F & FLAG_C ) ? FLAG_H : FLAG_C ) |
-	          ( ( IS_CMOS ? A : ( ( last_Q ^ F ) | A ) ) & ( FLAG_3 | FLAG_5 ) );
-	      Q = F;
-
-	*/
-
+		(((z80.Q ^ z80.F) | z80.A) & (FLAG_3 | FLAG_5))
+	z80.Q = z80.F
 }
 
 /* LD B,B */
@@ -3314,6 +3318,8 @@ func instr__IN_A_iNN(z80 *Z80) {
 	z80.IncPC(1)
 	z80.A = z80.readPort(intemp)
 	z80.memptr = intemp + 1
+	z80.F = (z80.F & FLAG_C) | sz53pTable[z80.A]
+	z80.Q = z80.F
 }
 
 /* CALL C,nnnn */
@@ -4896,6 +4902,7 @@ func instrED__IN_B_iC(z80 *Z80) {
 /* OUT (C),B */
 func instrED__OUT_iC_B(z80 *Z80) {
 	z80.writePort(z80.BC(), z80.B)
+	z80.memptr = z80.BC() + 1
 }
 
 /* SBC HL,BC */
@@ -4942,6 +4949,7 @@ func instrED__IN_C_iC(z80 *Z80) {
 /* OUT (C),C */
 func instrED__OUT_iC_C(z80 *Z80) {
 	z80.writePort(z80.BC(), z80.C)
+	z80.memptr = z80.BC() + 1
 }
 
 /* ADC HL,BC */
@@ -4972,6 +4980,7 @@ func instrED__IN_D_iC(z80 *Z80) {
 /* OUT (C),D */
 func instrED__OUT_iC_D(z80 *Z80) {
 	z80.writePort(z80.BC(), z80.D)
+	z80.memptr = z80.BC() + 1
 }
 
 /* SBC HL,DE */
@@ -4996,6 +5005,7 @@ func instrED__LD_A_I(z80 *Z80) {
 	z80.memory.ContendReadNoMreq(z80.IR(), 1)
 	z80.A = z80.I
 	z80.F = (z80.F & FLAG_C) | sz53Table[z80.A] | ternOpB(z80.IFF2 != 0, FLAG_V, 0)
+	z80.Q = z80.F
 }
 
 /* IN E,(C) */
@@ -5006,6 +5016,7 @@ func instrED__IN_E_iC(z80 *Z80) {
 /* OUT (C),E */
 func instrED__OUT_iC_E(z80 *Z80) {
 	z80.writePort(z80.BC(), z80.E)
+	z80.memptr = z80.BC() + 1
 }
 
 /* ADC HL,DE */
@@ -5030,6 +5041,7 @@ func instrED__LD_A_R(z80 *Z80) {
 	z80.memory.ContendReadNoMreq(z80.IR(), 1)
 	z80.A = byte(z80.R&0x7f) | (z80.R7 & 0x80)
 	z80.F = (z80.F & FLAG_C) | sz53Table[z80.A] | ternOpB(z80.IFF2 != 0, FLAG_V, 0)
+	z80.Q = z80.F
 }
 
 /* IN H,(C) */
@@ -5040,6 +5052,7 @@ func instrED__IN_H_iC(z80 *Z80) {
 /* OUT (C),H */
 func instrED__OUT_iC_H(z80 *Z80) {
 	z80.writePort(z80.BC(), z80.H)
+	z80.memptr = z80.BC() + 1
 }
 
 /* SBC HL,HL */
@@ -5061,6 +5074,7 @@ func instrED__RRD(z80 *Z80) {
 	z80.memory.WriteByte(z80.HL(), (z80.A<<4)|(bytetemp>>4))
 	z80.A = (z80.A & 0xf0) | (bytetemp & 0x0f)
 	z80.F = (z80.F & FLAG_C) | sz53pTable[z80.A]
+	z80.Q = z80.F
 	z80.memptr = z80.HL() + 1
 }
 
@@ -5072,6 +5086,7 @@ func instrED__IN_L_iC(z80 *Z80) {
 /* OUT (C),L */
 func instrED__OUT_iC_L(z80 *Z80) {
 	z80.writePort(z80.BC(), z80.L)
+	z80.memptr = z80.BC() + 1
 }
 
 /* ADC HL,HL */
@@ -5093,6 +5108,7 @@ func instrED__RLD(z80 *Z80) {
 	z80.memory.WriteByte(z80.HL(), (bytetemp<<4)|(z80.A&0x0f))
 	z80.A = (z80.A & 0xf0) | (bytetemp >> 4)
 	z80.F = (z80.F & FLAG_C) | sz53pTable[z80.A]
+	z80.Q = z80.F
 	z80.memptr = z80.HL() + 1
 }
 
@@ -5105,6 +5121,7 @@ func instrED__IN_F_iC(z80 *Z80) {
 /* OUT (C),0 */
 func instrED__OUT_iC_0(z80 *Z80) {
 	z80.writePort(z80.BC(), 0)
+	z80.memptr = z80.BC() + 1
 }
 
 /* SBC HL,SP */
@@ -5159,6 +5176,7 @@ func instrED__LDI(z80 *Z80) {
 		ternOpB(z80.BC() != 0, FLAG_V, 0) |
 		(bytetemp & FLAG_3) |
 		ternOpB((bytetemp&0x02) != 0, FLAG_5, 0)
+	z80.Q = z80.F
 }
 
 /* CPI */
@@ -5174,6 +5192,7 @@ func instrED__CPI(z80 *Z80) {
 		bytetemp--
 	}
 	z80.F |= (bytetemp & FLAG_3) | ternOpB((bytetemp&0x02) != 0, FLAG_5, 0)
+	z80.Q = z80.F
 	z80.memptr++
 }
 
@@ -5190,6 +5209,7 @@ func instrED__INI(z80 *Z80) {
 		ternOpB(initemp2 < initemp, FLAG_H|FLAG_C, 0) |
 		ternOpB(parityTable[(initemp2&0x07)^z80.B] != 0, FLAG_P, 0) |
 		sz53Table[z80.B]
+	z80.Q = z80.F
 }
 
 /* OUTI */
@@ -5206,6 +5226,7 @@ func instrED__OUTI(z80 *Z80) {
 		ternOpB(outitemp2 < outitemp, FLAG_H|FLAG_C, 0) |
 		ternOpB(parityTable[(outitemp2&0x07)^z80.B] != 0, FLAG_P, 0) |
 		sz53Table[z80.B]
+	z80.Q = z80.F
 }
 
 /* LDD */
@@ -5221,6 +5242,7 @@ func instrED__LDD(z80 *Z80) {
 		ternOpB(z80.BC() != 0, FLAG_V, 0) |
 		(bytetemp & FLAG_3) |
 		ternOpB((bytetemp&0x02) != 0, FLAG_5, 0)
+	z80.Q = z80.F
 }
 
 /* CPD */
@@ -5236,6 +5258,7 @@ func instrED__CPD(z80 *Z80) {
 		bytetemp--
 	}
 	z80.F |= (bytetemp & FLAG_3) | ternOpB((bytetemp&0x02) != 0, FLAG_5, 0)
+	z80.Q = z80.F
 	z80.memptr--
 }
 
@@ -5252,6 +5275,7 @@ func instrED__IND(z80 *Z80) {
 		ternOpB(initemp2 < initemp, FLAG_H|FLAG_C, 0) |
 		ternOpB(parityTable[(initemp2&0x07)^z80.B] != 0, FLAG_P, 0) |
 		sz53Table[z80.B]
+	z80.Q = z80.F
 }
 
 /* OUTD */
@@ -5268,6 +5292,7 @@ func instrED__OUTD(z80 *Z80) {
 		ternOpB(outitemp2 < outitemp, FLAG_H|FLAG_C, 0) |
 		ternOpB(parityTable[(outitemp2&0x07)^z80.B] != 0, FLAG_P, 0) |
 		sz53Table[z80.B]
+	z80.Q = z80.F
 }
 
 /* LDIR */
@@ -5278,6 +5303,7 @@ func instrED__LDIR(z80 *Z80) {
 	z80.DecBC()
 	bytetemp += z80.A
 	z80.F = (z80.F & (FLAG_C | FLAG_Z | FLAG_S)) | ternOpB(z80.BC() != 0, FLAG_V, 0) | (bytetemp & FLAG_3) | ternOpB((bytetemp&0x02 != 0), FLAG_5, 0)
+	z80.Q = z80.F
 	if z80.BC() != 0 {
 		z80.memory.ContendWriteNoMreq_loop(z80.DE(), 1, 5)
 		z80.DecPC(2)
@@ -5299,6 +5325,7 @@ func instrED__CPIR(z80 *Z80) {
 		bytetemp--
 	}
 	z80.F |= (bytetemp & FLAG_3) | ternOpB((bytetemp&0x02) != 0, FLAG_5, 0)
+	z80.Q = z80.F
 	z80.memptr++
 	if (z80.F & (FLAG_V | FLAG_Z)) == FLAG_V {
 		z80.memory.ContendReadNoMreq_loop(z80.HL(), 1, 5)
@@ -5320,6 +5347,8 @@ func instrED__INIR(z80 *Z80) {
 		ternOpB(initemp2 < initemp, FLAG_H|FLAG_C, 0) |
 		ternOpB(parityTable[(initemp2&0x07)^z80.B] != 0, FLAG_P, 0) |
 		sz53Table[z80.B]
+
+	z80.Q = z80.F
 
 	if z80.B != 0 {
 		z80.memory.ContendWriteNoMreq_loop(z80.HL(), 1, 5)
@@ -5343,6 +5372,8 @@ func instrED__OTIR(z80 *Z80) {
 		ternOpB(parityTable[(outitemp2&0x07)^z80.B] != 0, FLAG_P, 0) |
 		sz53Table[z80.B]
 
+	z80.Q = z80.F
+
 	if z80.B != 0 {
 		z80.memory.ContendReadNoMreq_loop(z80.BC(), 1, 5)
 		z80.DecPC(2)
@@ -5357,6 +5388,7 @@ func instrED__LDDR(z80 *Z80) {
 	z80.DecBC()
 	bytetemp += z80.A
 	z80.F = (z80.F & (FLAG_C | FLAG_Z | FLAG_S)) | ternOpB(z80.BC() != 0, FLAG_V, 0) | (bytetemp & FLAG_3) | ternOpB((bytetemp&0x02 != 0), FLAG_5, 0)
+	z80.Q = z80.F
 	if z80.BC() != 0 {
 		z80.memory.ContendWriteNoMreq_loop(z80.DE(), 1, 5)
 		z80.DecPC(2)
@@ -5378,6 +5410,7 @@ func instrED__CPDR(z80 *Z80) {
 		bytetemp--
 	}
 	z80.F |= (bytetemp & FLAG_3) | ternOpB((bytetemp&0x02) != 0, FLAG_5, 0)
+	z80.Q = z80.F
 	z80.memptr--
 	if (z80.F & (FLAG_V | FLAG_Z)) == FLAG_V {
 		z80.memory.ContendReadNoMreq_loop(z80.HL(), 1, 5)
@@ -5400,6 +5433,8 @@ func instrED__INDR(z80 *Z80) {
 		ternOpB(parityTable[(initemp2&0x07)^z80.B] != 0, FLAG_P, 0) |
 		sz53Table[z80.B]
 
+	z80.Q = z80.F
+
 	if z80.B != 0 {
 		z80.memory.ContendWriteNoMreq_loop(z80.HL(), 1, 5)
 		z80.DecPC(2)
@@ -5421,6 +5456,8 @@ func instrED__OTDR(z80 *Z80) {
 		ternOpB(outitemp2 < outitemp, FLAG_H|FLAG_C, 0) |
 		ternOpB(parityTable[(outitemp2&0x07)^z80.B] != 0, FLAG_P, 0) |
 		sz53Table[z80.B]
+
+	z80.Q = z80.F
 
 	if z80.B != 0 {
 		z80.memory.ContendReadNoMreq_loop(z80.BC(), 1, 5)

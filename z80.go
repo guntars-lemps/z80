@@ -28,6 +28,10 @@ The z80 package implements a Zilog Z80 emulator.
 */
 package z80
 
+import (
+	"fmt"
+)
+
 // The flags
 const FLAG_C = 0x01
 const FLAG_N = 0x02
@@ -80,6 +84,7 @@ type Z80 struct {
 	A_, F_, B_, C_, D_, E_, H_, L_ byte
 	IXH, IXL, IYH, IYL             byte
 	I, IFF1, IFF2, IM              byte
+	Q, last_Q                      byte
 
 	// The highest bit (bit 7) of the R register
 	R7 byte
@@ -135,7 +140,7 @@ func (z80 *Z80) Reset() {
 	z80.IXH, z80.IXL, z80.IYH, z80.IYL = 0, 0, 0, 0
 
 	z80.sp = 0xffff
-	z80.I, z80.R, z80.R7, z80.pc, z80.memptr, z80.IFF1, z80.IFF2, z80.IM = 0, 0, 0, 0, 0, 0, 0, 0
+	z80.I, z80.R, z80.R7, z80.pc, z80.memptr, z80.IFF1, z80.IFF2, z80.IM, z80.Q, z80.last_Q = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 	z80.Tstates = 0
 
@@ -188,6 +193,7 @@ func (z80 *Z80) Interrupt() {
 			panic("Unknown interrupt mode")
 		}
 		z80.memptr = z80.pc
+		z80.Q = 0
 	}
 }
 
@@ -214,6 +220,7 @@ func (z80 *Z80) NonMaskableInterrupt() {
 	}
 
 	z80.pc = 0x0066
+	z80.Q = 0
 }
 
 func ternOpB(cond bool, ret1, ret2 byte) byte {
@@ -243,11 +250,13 @@ func (z80 *Z80) dec(value *byte) {
 	z80.F = (z80.F & FLAG_C) | ternOpB((*value&0x0f) != 0, 0, FLAG_H) | FLAG_N
 	*value--
 	z80.F |= ternOpB(*value == 0x7f, FLAG_V, 0) | sz53Table[*value]
+	z80.Q = z80.F
 }
 
 func (z80 *Z80) inc(value *byte) {
 	*value++
 	z80.F = (z80.F & FLAG_C) | ternOpB(*value == 0x80, FLAG_V, 0) | ternOpB((*value&0x0f) != 0, 0, FLAG_H) | sz53Table[(*value)]
+	z80.Q = z80.F
 }
 
 func (z80 *Z80) jr() {
@@ -292,11 +301,13 @@ func (z80 *Z80) sub(value byte) {
 	z80.F = ternOpB(subtemp&0x100 != 0, FLAG_C, 0) | FLAG_N |
 		halfcarrySubTable[lookup&0x07] | overflowSubTable[lookup>>4] |
 		sz53Table[z80.A]
+	z80.Q = z80.F
 }
 
 func (z80 *Z80) and(value byte) {
 	z80.A &= value
 	z80.F = FLAG_H | sz53pTable[z80.A]
+	z80.Q = z80.F
 }
 
 func (z80 *Z80) adc(value byte) {
@@ -306,6 +317,7 @@ func (z80 *Z80) adc(value byte) {
 	z80.A = byte(adctemp)
 
 	z80.F = ternOpB((adctemp&0x100) != 0, FLAG_C, 0) | halfcarryAddTable[lookup&0x07] | overflowAddTable[lookup>>4] | sz53Table[z80.A]
+	z80.Q = z80.F
 }
 
 func (z80 *Z80) adc16(value uint16) {
@@ -317,6 +329,7 @@ func (z80 *Z80) adc16(value uint16) {
 	z80.SetHL(uint16(add16temp))
 
 	z80.F = ternOpB((uint(add16temp)&0x10000) != 0, FLAG_C, 0) | overflowAddTable[lookup>>4] | (z80.H & (FLAG_3 | FLAG_5 | FLAG_S)) | halfcarryAddTable[lookup&0x07] | ternOpB(z80.HL() != 0, 0, FLAG_Z)
+	z80.Q = z80.F
 }
 
 func (z80 *Z80) add16(value1 register16, value2 uint16) {
@@ -328,6 +341,7 @@ func (z80 *Z80) add16(value1 register16, value2 uint16) {
 	value1.set(uint16(add16temp))
 
 	z80.F = (z80.F & (FLAG_V | FLAG_Z | FLAG_S)) | ternOpB((add16temp&0x10000) != 0, FLAG_C, 0) | (byte(add16temp>>8) & (FLAG_3 | FLAG_5)) | halfcarryAddTable[lookup]
+
 }
 
 func (z80 *Z80) add(value byte) {
@@ -335,11 +349,13 @@ func (z80 *Z80) add(value byte) {
 	var lookup byte = ((z80.A & 0x88) >> 3) | ((value & 0x88) >> 2) | byte((addtemp&0x88)>>1)
 	z80.A = byte(addtemp)
 	z80.F = ternOpB(addtemp&0x100 != 0, FLAG_C, 0) | halfcarryAddTable[lookup&0x07] | overflowAddTable[lookup>>4] | sz53Table[z80.A]
+	z80.Q = z80.F
 }
 
 func (z80 *Z80) or(value byte) {
 	z80.A |= value
 	z80.F = sz53pTable[z80.A]
+	z80.Q = z80.F
 }
 
 func (z80 *Z80) pop16() (regl, regh byte) {
@@ -367,12 +383,14 @@ func (z80 *Z80) rl(value byte) byte {
 	rltemp := value
 	value = (value << 1) | (z80.F & FLAG_C)
 	z80.F = (rltemp >> 7) | sz53pTable[value]
+	z80.Q = z80.F
 	return value
 }
 
 func (z80 *Z80) rlc(value byte) byte {
 	value = (value << 1) | (value >> 7)
 	z80.F = (value & FLAG_C) | sz53pTable[value]
+	z80.Q = z80.F
 	return value
 }
 
@@ -380,6 +398,7 @@ func (z80 *Z80) rr(value byte) byte {
 	rrtemp := value
 	value = (value >> 1) | (z80.F << 7)
 	z80.F = (rrtemp & FLAG_C) | sz53pTable[value]
+	z80.Q = z80.F
 	return value
 }
 
@@ -387,6 +406,7 @@ func (z80 *Z80) rrc(value byte) byte {
 	z80.F = value & FLAG_C
 	value = (value >> 1) | (value << 7)
 	z80.F |= sz53pTable[value]
+	z80.Q = z80.F
 	return value
 }
 
@@ -402,6 +422,7 @@ func (z80 *Z80) sbc(value byte) {
 	var lookup byte = ((z80.A & 0x88) >> 3) | ((value & 0x88) >> 2) | byte((sbctemp&0x88)>>1)
 	z80.A = byte(sbctemp)
 	z80.F = ternOpB((sbctemp&0x100) != 0, FLAG_C, 0) | FLAG_N | halfcarrySubTable[lookup&0x07] | overflowSubTable[lookup>>4] | sz53Table[z80.A]
+	z80.Q = z80.F
 }
 
 func (z80 *Z80) sbc16(value uint16) {
@@ -413,12 +434,14 @@ func (z80 *Z80) sbc16(value uint16) {
 	z80.SetHL(uint16(sub16temp))
 
 	z80.F = ternOpB((sub16temp&0x10000) != 0, FLAG_C, 0) | FLAG_N | overflowSubTable[lookup>>4] | (z80.H & (FLAG_3 | FLAG_5 | FLAG_S)) | halfcarrySubTable[lookup&0x07] | ternOpB(z80.HL() != 0, 0, FLAG_Z)
+	z80.Q = z80.F
 }
 
 func (z80 *Z80) sla(value byte) byte {
 	z80.F = value >> 7
 	value <<= 1
 	z80.F |= sz53pTable[value]
+	z80.Q = z80.F
 	return value
 }
 
@@ -426,6 +449,7 @@ func (z80 *Z80) sll(value byte) byte {
 	z80.F = value >> 7
 	value = (value << 1) | 0x01
 	z80.F |= sz53pTable[(value)]
+	z80.Q = z80.F
 	return value
 }
 
@@ -433,6 +457,7 @@ func (z80 *Z80) sra(value byte) byte {
 	z80.F = value & FLAG_C
 	value = (value & 0x80) | (value >> 1)
 	z80.F |= sz53pTable[value]
+	z80.Q = z80.F
 	return value
 }
 
@@ -440,12 +465,14 @@ func (z80 *Z80) srl(value byte) byte {
 	z80.F = value & FLAG_C
 	value >>= 1
 	z80.F |= sz53pTable[value]
+	z80.Q = z80.F
 	return value
 }
 
 func (z80 *Z80) xor(value byte) {
 	z80.A ^= value
 	z80.F = sz53pTable[z80.A]
+	z80.Q = z80.F
 }
 
 func (z80 *Z80) bit(bit, value byte) {
@@ -456,6 +483,7 @@ func (z80 *Z80) bit(bit, value byte) {
 	if bit == 7 && (value&0x80) != 0 {
 		z80.F |= FLAG_S
 	}
+	z80.Q = z80.F
 }
 
 func (z80 *Z80) bit_memptr(bit, value byte) {
@@ -466,6 +494,7 @@ func (z80 *Z80) bit_memptr(bit, value byte) {
 	if bit == 7 && (value&0x80) != 0 {
 		z80.F |= FLAG_S
 	}
+	z80.Q = z80.F
 }
 
 func (z80 *Z80) biti(bit, value byte, address uint16) {
@@ -476,6 +505,7 @@ func (z80 *Z80) biti(bit, value byte, address uint16) {
 	if (bit == 7) && (value&0x80) != 0 {
 		z80.F |= FLAG_S
 	}
+	z80.Q = z80.F
 }
 
 func (z80 *Z80) call(cond bool) {
@@ -501,12 +531,14 @@ func (z80 *Z80) cp(value byte) {
 	var cptemp uint16 = uint16(z80.A) - uint16(value)
 	var lookup byte = ((z80.A & 0x88) >> 3) | ((value & 0x88) >> 2) | byte((cptemp&0x88)>>1)
 	z80.F = ternOpB((cptemp&0x100) != 0, FLAG_C, ternOpB(cptemp != 0, 0, FLAG_Z)) | FLAG_N | halfcarrySubTable[lookup&0x07] | overflowSubTable[lookup>>4] | (value & (FLAG_3 | FLAG_5)) | byte(cptemp&FLAG_S)
+	z80.Q = z80.F
 }
 
 func (z80 *Z80) in(reg *byte, port uint16) {
 	z80.memptr = port + 1
 	*reg = z80.readPort(port)
 	z80.F = (z80.F & FLAG_C) | sz53pTable[*reg]
+	z80.Q = z80.F
 }
 
 func (z80 *Z80) readPort(address uint16) byte {
@@ -579,6 +611,7 @@ func (z80 *Z80) DoOpcode() {
 	z80.R = (z80.R + 1) & 0x7f
 	z80.pc++
 	OpcodesMap[opcode](z80)
+	fmt.Printf("Q after opcode %d\n", z80.Q)
 }
 
 func invalidOpcode(z80 *Z80) {
