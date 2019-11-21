@@ -607,6 +607,26 @@ func (z80 *Z80) AddTstates(time int) {
 	z80.Tstates += time
 }
 
+func (z80 *Z80) mRead(address uint16) byte {
+	z80.AddTstates(3)
+	return z80.memory.Read()
+}
+
+func (z80 *Z80) mWrite(address uint16, value byte) {
+	z80.AddTstates(3)
+	return z80.memory.Write(address, value)
+}
+
+func (z80 *Z80) pRead(address uint16) byte {
+	z80.AddTstates(3)
+	return z80.port.ReadPort(address)
+}
+
+func (z80 *Z80) pWrite(address uint16, b byte) {
+	z80.AddTstates(3)
+	return z80.port.WritePort(address, b)
+}
+
 // Execute a single instruction at the program counter.
 func (z80 *Z80) DoOpcode() {
 	z80.AddTstates(4)
