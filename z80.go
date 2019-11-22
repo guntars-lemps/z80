@@ -29,7 +29,7 @@ The z80 package implements a Zilog Z80 emulator.
 package z80
 
 import (
-	"fmt"
+	_ "fmt"
 )
 
 // The flags
@@ -102,7 +102,7 @@ type Z80 struct {
 	// Number of tstates since the beginning of the last frame.
 	// The value of this variable is usually smaller than TStatesPerFrame,
 	// but in some unlikely circumstances it may be >= than that.
-	Tstates int
+	tstates int
 
 	Halted bool
 
@@ -142,7 +142,7 @@ func (z80 *Z80) Reset() {
 	z80.sp = 0xffff
 	z80.I, z80.R, z80.R7, z80.pc, z80.memptr, z80.IFF1, z80.IFF2, z80.IM, z80.Q = 0, 0, 0, 0, 0, 0, 0, 0, 0
 
-	z80.Tstates = 0
+	z80.tstates = 0
 
 	z80.Halted = false
 	z80.interruptsEnabledAt = 0
@@ -163,20 +163,17 @@ func (z80 *Z80) Interrupt() {
 			z80.Halted = false
 		}
 
-		z80.Tstates += 7
+		z80.addTstates(7)
 
 		z80.R = (z80.R + 1) & 0x7f
 		z80.IFF1, z80.IFF2 = 0, 0
 
 		// push PC
-		{
-			pch, pcl := splitWord(z80.pc)
-
-			z80.sp--
-			z80.memory.Write(z80.sp, pch)
-			z80.sp--
-			z80.memory.Write(z80.sp, pcl)
-		}
+		pch, pcl := splitWord(z80.pc)
+		z80.sp--
+		z80.mWrite(z80.sp, pch)
+		z80.sp--
+		z80.mWrite(z80.sp, pcl)
 
 		switch z80.IM {
 		case 0, 1:
@@ -184,9 +181,9 @@ func (z80 *Z80) Interrupt() {
 
 		case 2:
 			var inttemp uint16 = (uint16(z80.I) << 8) | 0xff
-			pcl := z80.memory.Read(inttemp)
+			pcl := z80.mRead(inttemp)
 			inttemp++
-			pch := z80.memory.Read(inttemp)
+			pch := z80.mRead(inttemp)
 			z80.pc = joinBytes(pch, pcl)
 
 		default:
@@ -204,20 +201,17 @@ func (z80 *Z80) NonMaskableInterrupt() {
 		z80.Halted = false
 	}
 
-	z80.Tstates += 7
+	z80.addTstates(5)
 
 	z80.R = (z80.R + 1) & 0x7f
 	z80.IFF1, z80.IFF2 = 0, 0
 
 	// push PC
-	{
-		pch, pcl := splitWord(z80.pc)
-
-		z80.sp--
-		z80.memory.Write(z80.sp, pch)
-		z80.sp--
-		z80.memory.Write(z80.sp, pcl)
-	}
+	pch, pcl := splitWord(z80.pc)
+	z80.sp--
+	z80.mWrite(z80.sp, pch)
+	z80.sp--
+	z80.mWrite(z80.sp, pcl)
 
 	z80.pc = 0x0066
 	z80.Q = 0
@@ -236,9 +230,9 @@ func signExtend(v byte) int16 {
 
 func (z80 *Z80) jp(cond bool) {
 	var jptemp uint16 = z80.pc
-	z80.memptr = uint16(z80.memory.Read(jptemp))
+	z80.memptr = uint16(z80.mRead(jptemp))
 	jptemp++
-	z80.memptr = z80.memptr | (uint16(z80.memory.Read(jptemp)) << 8)
+	z80.memptr = z80.memptr | (uint16(z80.mRead(jptemp)) << 8)
 	if cond {
 		z80.pc = z80.memptr
 	} else {
@@ -260,36 +254,34 @@ func (z80 *Z80) inc(value *byte) {
 }
 
 func (z80 *Z80) jr() {
-	var jrtemp int16 = signExtend(z80.memory.Read(z80.pc))
-	z80.AddTstates(5)
+	var jrtemp int16 = signExtend(z80.mRead(z80.pc))
+	z80.addTstates(5)
 	z80.pc += uint16(jrtemp)
 	z80.memptr = z80.pc + 1
 }
 
 func (z80 *Z80) ld16nnrr(regl, regh byte) {
 	var ldtemp uint16
-
-	ldtemp = uint16(z80.memory.Read(z80.pc))
+	ldtemp = uint16(z80.mRead(z80.pc))
 	z80.pc++
-	ldtemp |= uint16(z80.memory.Read(z80.pc)) << 8
+	ldtemp |= uint16(z80.mRead(z80.pc)) << 8
 	z80.pc++
 	z80.memptr = ldtemp
-	z80.memory.Write(ldtemp, regl)
+	z80.mWrite(ldtemp, regl)
 	ldtemp++
-	z80.memory.Write(ldtemp, regh)
+	z80.mWrite(ldtemp, regh)
 	z80.memptr = ldtemp
 }
 
 func (z80 *Z80) ld16rrnn(regl, regh *byte) {
 	var ldtemp uint16
-
-	ldtemp = uint16(z80.memory.Read(z80.pc))
+	ldtemp = uint16(z80.mRead(z80.pc))
 	z80.pc++
-	ldtemp |= uint16(z80.memory.Read(z80.pc)) << 8
+	ldtemp |= uint16(z80.mRead(z80.pc)) << 8
 	z80.pc++
-	*regl = z80.memory.Read(ldtemp)
+	*regl = z80.mRead(ldtemp)
 	ldtemp++
-	*regh = z80.memory.Read(ldtemp)
+	*regh = z80.mRead(ldtemp)
 	z80.memptr = ldtemp
 }
 
@@ -360,18 +352,18 @@ func (z80 *Z80) or(value byte) {
 }
 
 func (z80 *Z80) pop16() (regl, regh byte) {
-	regl = z80.memory.Read(z80.sp)
+	regl = z80.mRead(z80.sp)
 	z80.sp++
-	regh = z80.memory.Read(z80.sp)
+	regh = z80.mRead(z80.sp)
 	z80.sp++
 	return
 }
 
 func (z80 *Z80) push16(regl, regh byte) {
 	z80.sp--
-	z80.memory.Write(z80.sp, regh)
+	z80.mWrite(z80.sp, regh)
 	z80.sp--
-	z80.memory.Write(z80.sp, regl)
+	z80.mWrite(z80.sp, regl)
 }
 
 func (z80 *Z80) ret() {
@@ -511,18 +503,18 @@ func (z80 *Z80) biti(bit, value byte, address uint16) {
 func (z80 *Z80) call(cond bool) {
 	var calltempl, calltemph byte
 	if cond {
-		calltempl = z80.memory.Read(z80.pc)
+		calltempl = z80.mRead(z80.pc)
 		z80.pc++
-		calltemph = z80.memory.Read(z80.pc)
-		z80.AddTstates(1)
+		calltemph = z80.mRead(z80.pc)
+		z80.addTstates(1)
 		z80.pc++
 		pch, pcl := splitWord(z80.pc)
 		z80.push16(pcl, pch)
 		z80.pc = joinBytes(calltemph, calltempl)
 		z80.memptr = z80.pc
 	} else {
-		z80.AddTstates(3)
-		z80.AddTstates(3)
+		z80.addTstates(3)
+		z80.addTstates(3)
 		z80.IncPC(2)
 	}
 }
@@ -537,17 +529,9 @@ func (z80 *Z80) cp(value byte) {
 
 func (z80 *Z80) in(reg *byte, port uint16) {
 	z80.memptr = port + 1
-	*reg = z80.readPort(port)
+	*reg = z80.pRead(port)
 	z80.F = (z80.F & FLAG_C) | sz53pTable[*reg]
 	z80.Q = z80.F
-}
-
-func (z80 *Z80) readPort(address uint16) byte {
-	return z80.ports.ReadPort(address)
-}
-
-func (z80 *Z80) writePort(address uint16, b byte) {
-	z80.ports.WritePort(address, b)
 }
 
 // PC returns the program counter.
@@ -603,38 +587,52 @@ func (z80 *Z80) sltTrap(address int16, level byte) int {
 	return 0
 }
 
-func (z80 *Z80) AddTstates(time int) {
-	z80.Tstates += time
+// deliberately not exported
+func (z80 *Z80) addTstates(tstates int) {
+	z80.tstates += tstates
+}
+
+// external for frame states substraction
+func (z80 *Z80) ModTstates(frameStates int) {
+	z80.tstates = (z80.tstates % frameStates)
+}
+
+func (z80 *Z80) GetTstates() int {
+	return z80.tstates
 }
 
 func (z80 *Z80) mRead(address uint16) byte {
-	z80.AddTstates(3)
-	return z80.memory.Read()
+	z80.addTstates(3)
+	return z80.memory.Read(address)
 }
 
 func (z80 *Z80) mWrite(address uint16, value byte) {
-	z80.AddTstates(3)
-	return z80.memory.Write(address, value)
+	z80.addTstates(3)
+	z80.memory.Write(address, value)
 }
 
 func (z80 *Z80) pRead(address uint16) byte {
-	z80.AddTstates(3)
-	return z80.port.ReadPort(address)
+	z80.addTstates(4)
+	return z80.ports.Read(address)
 }
 
 func (z80 *Z80) pWrite(address uint16, b byte) {
-	z80.AddTstates(3)
-	return z80.port.WritePort(address, b)
+	z80.addTstates(4)
+	z80.ports.Write(address, b)
+}
+
+func (z80 *Z80) DoHalt() {
+	z80.addTstates(4)
+	z80.R = (z80.R + 1) & 0x7f
 }
 
 // Execute a single instruction at the program counter.
 func (z80 *Z80) DoOpcode() {
-	z80.AddTstates(4)
+	z80.addTstates(4)
 	opcode := z80.memory.Read(z80.pc)
 	z80.R = (z80.R + 1) & 0x7f
 	z80.pc++
 	OpcodesMap[opcode](z80)
-	fmt.Printf("Q after opcode %d\n", z80.Q)
 }
 
 func invalidOpcode(z80 *Z80) {
@@ -642,7 +640,7 @@ func invalidOpcode(z80 *Z80) {
 }
 
 func opcode_cb(z80 *Z80) {
-	z80.AddTstates(4)
+	z80.addTstates(4)
 	var opcode2 byte = z80.memory.Read(z80.pc)
 	z80.pc++
 	z80.R++
@@ -650,7 +648,7 @@ func opcode_cb(z80 *Z80) {
 }
 
 func opcode_ed(z80 *Z80) {
-	z80.AddTstates(4)
+	z80.addTstates(4)
 	var opcode2 byte = z80.memory.Read(z80.pc)
 	z80.pc++
 	z80.R++
@@ -663,19 +661,18 @@ func opcode_ed(z80 *Z80) {
 }
 
 func opcode_dd(z80 *Z80) {
-	z80.AddTstates(4)
+	z80.addTstates(4)
 	var opcode2 byte = z80.memory.Read(z80.pc)
 	z80.pc++
 	z80.R++
 
 	switch opcode2 {
 	case 0xcb:
-		z80.AddTstates(3)
+		z80.addTstates(4)
 		z80.tempaddr = z80.IX() + uint16(signExtend(z80.memory.Read(z80.pc)))
 		z80.pc++
-		z80.AddTstates(3)
+		z80.addTstates(4)
 		var opcode3 byte = z80.memory.Read(z80.pc)
-		z80.AddTstates(2)
 		z80.pc++
 		OpcodesMap[SHIFT_0xDDCB+int(opcode3)](z80)
 	default:
@@ -689,19 +686,18 @@ func opcode_dd(z80 *Z80) {
 }
 
 func opcode_fd(z80 *Z80) {
-	z80.AddTstates(4)
+	z80.addTstates(4)
 	var opcode2 byte = z80.memory.Read(z80.pc)
 	z80.pc++
 	z80.R++
 
 	switch opcode2 {
 	case 0xcb:
-		z80.AddTstates(3)
+		z80.addTstates(4)
 		z80.tempaddr = z80.IY() + uint16(signExtend(z80.memory.Read(z80.pc)))
 		z80.pc++
-		z80.AddTstates(3)
+		z80.addTstates(4)
 		var opcode3 byte = z80.memory.Read(z80.pc)
-		z80.AddTstates(2)
 		z80.pc++
 
 		OpcodesMap[SHIFT_0xFDCB+int(opcode3)](z80)

@@ -26,6 +26,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package z80
 
 type PortAccessor interface {
-    ReadPort(address uint16) byte
-    WritePort(address uint16, b byte)
+    Read(address uint16) byte
+    Write(address uint16, b byte)
 }

@@ -2034,9 +2034,9 @@ func instr__NOP(z80 *Z80) {
 
 /* LD BC,nnnn */
 func instr__LD_BC_NNNN(z80 *Z80) {
-	b1 := z80.memory.Read(z80.PC())
+	b1 := z80.mRead(z80.PC())
 	z80.IncPC(1)
-	b2 := z80.memory.Read(z80.PC())
+	b2 := z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.SetBC(joinBytes(b2, b1))
 	z80.Q = 0
@@ -2044,14 +2044,14 @@ func instr__LD_BC_NNNN(z80 *Z80) {
 
 /* LD (BC),A */
 func instr__LD_iBC_A(z80 *Z80) {
-	z80.memory.Write(z80.BC(), z80.A)
+	z80.mWrite(z80.BC(), z80.A)
 	z80.memptr = (uint16(z80.A) << 8) | ((z80.BC() + 1) & 0xff)
 	z80.Q = 0
 }
 
 /* INC BC */
 func instr__INC_BC(z80 *Z80) {
-	z80.AddTstates(2)
+	z80.addTstates(2)
 	z80.IncBC()
 	z80.Q = 0
 }
@@ -2073,7 +2073,7 @@ func instr__DEC_B(z80 *Z80) {
 
 /* LD B,nn */
 func instr__LD_B_NN(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.PC())
+	z80.B = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.Q = 0
 }
@@ -2097,20 +2097,20 @@ func instr__EX_AF_AF(z80 *Z80) {
 
 /* ADD HL,BC */
 func instr__ADD_HL_BC(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.add16(z80.hl, z80.BC())
 }
 
 /* LD A,(BC) */
 func instr__LD_A_iBC(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.BC())
+	z80.A = z80.mRead(z80.BC())
 	z80.memptr = z80.BC() + 1
 	z80.Q = 0
 }
 
 /* DEC BC */
 func instr__DEC_BC(z80 *Z80) {
-	z80.AddTstates(2)
+	z80.addTstates(2)
 	z80.DecBC()
 	z80.Q = 0
 }
@@ -2132,7 +2132,7 @@ func instr__DEC_C(z80 *Z80) {
 
 /* LD C,nn */
 func instr__LD_C_NN(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.PC())
+	z80.C = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.Q = 0
 }
@@ -2147,12 +2147,12 @@ func instr__RRCA(z80 *Z80) {
 
 /* DJNZ offset */
 func instr__DJNZ_OFFSET(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.B--
 	if z80.B != 0 {
 		z80.jr()
 	} else {
-		z80.AddTstates(3)
+		z80.addTstates(3)
 	}
 	z80.IncPC(1)
 	z80.Q = 0
@@ -2160,9 +2160,9 @@ func instr__DJNZ_OFFSET(z80 *Z80) {
 
 /* LD DE,nnnn */
 func instr__LD_DE_NNNN(z80 *Z80) {
-	b1 := z80.memory.Read(z80.PC())
+	b1 := z80.mRead(z80.PC())
 	z80.IncPC(1)
-	b2 := z80.memory.Read(z80.PC())
+	b2 := z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.SetDE(joinBytes(b2, b1))
 	z80.Q = 0
@@ -2170,14 +2170,14 @@ func instr__LD_DE_NNNN(z80 *Z80) {
 
 /* LD (DE),A */
 func instr__LD_iDE_A(z80 *Z80) {
-	z80.memory.Write(z80.DE(), z80.A)
+	z80.mWrite(z80.DE(), z80.A)
 	z80.memptr = (uint16(z80.A) << 8) | ((z80.DE() + 1) & 0xff)
 	z80.Q = 0
 }
 
 /* INC DE */
 func instr__INC_DE(z80 *Z80) {
-	z80.AddTstates(2)
+	z80.addTstates(2)
 	z80.IncDE()
 	z80.Q = 0
 }
@@ -2199,7 +2199,7 @@ func instr__DEC_D(z80 *Z80) {
 
 /* LD D,nn */
 func instr__LD_D_NN(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.PC())
+	z80.D = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.Q = 0
 }
@@ -2221,20 +2221,20 @@ func instr__JR_OFFSET(z80 *Z80) {
 
 /* ADD HL,DE */
 func instr__ADD_HL_DE(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.add16(z80.hl, z80.DE())
 }
 
 /* LD A,(DE) */
 func instr__LD_A_iDE(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.DE())
+	z80.A = z80.mRead(z80.DE())
 	z80.memptr = z80.DE() + 1
 	z80.Q = 0
 }
 
 /* DEC DE */
 func instr__DEC_DE(z80 *Z80) {
-	z80.AddTstates(2)
+	z80.addTstates(2)
 	z80.DecDE()
 	z80.Q = 0
 }
@@ -2256,7 +2256,7 @@ func instr__DEC_E(z80 *Z80) {
 
 /* LD E,nn */
 func instr__LD_E_NN(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.PC())
+	z80.E = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.Q = 0
 }
@@ -2274,7 +2274,7 @@ func instr__JR_NZ_OFFSET(z80 *Z80) {
 	if (z80.F & FLAG_Z) == 0 {
 		z80.jr()
 	} else {
-		z80.AddTstates(3)
+		z80.addTstates(3)
 	}
 	z80.IncPC(1)
 	z80.Q = 0
@@ -2282,9 +2282,9 @@ func instr__JR_NZ_OFFSET(z80 *Z80) {
 
 /* LD HL,nnnn */
 func instr__LD_HL_NNNN(z80 *Z80) {
-	b1 := z80.memory.Read(z80.PC())
+	b1 := z80.mRead(z80.PC())
 	z80.IncPC(1)
-	b2 := z80.memory.Read(z80.PC())
+	b2 := z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.SetHL(joinBytes(b2, b1))
 	z80.Q = 0
@@ -2298,7 +2298,7 @@ func instr__LD_iNNNN_HL(z80 *Z80) {
 
 /* INC HL */
 func instr__INC_HL(z80 *Z80) {
-	z80.AddTstates(2)
+	z80.addTstates(2)
 	z80.IncHL()
 	z80.Q = 0
 }
@@ -2320,7 +2320,7 @@ func instr__DEC_H(z80 *Z80) {
 
 /* LD H,nn */
 func instr__LD_H_NN(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.PC())
+	z80.H = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.Q = 0
 }
@@ -2352,7 +2352,7 @@ func instr__JR_Z_OFFSET(z80 *Z80) {
 	if (z80.F & FLAG_Z) != 0 {
 		z80.jr()
 	} else {
-		z80.AddTstates(3)
+		z80.addTstates(3)
 	}
 	z80.IncPC(1)
 	z80.Q = 0
@@ -2360,7 +2360,7 @@ func instr__JR_Z_OFFSET(z80 *Z80) {
 
 /* ADD HL,HL */
 func instr__ADD_HL_HL(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.add16(z80.hl, z80.HL())
 }
 
@@ -2372,7 +2372,7 @@ func instr__LD_HL_iNNNN(z80 *Z80) {
 
 /* DEC HL */
 func instr__DEC_HL(z80 *Z80) {
-	z80.AddTstates(2)
+	z80.addTstates(2)
 	z80.DecHL()
 	z80.Q = 0
 }
@@ -2394,7 +2394,7 @@ func instr__DEC_L(z80 *Z80) {
 
 /* LD L,nn */
 func instr__LD_L_NN(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.PC())
+	z80.L = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.Q = 0
 }
@@ -2413,7 +2413,7 @@ func instr__JR_NC_OFFSET(z80 *Z80) {
 	if (z80.F & FLAG_C) == 0 {
 		z80.jr()
 	} else {
-		z80.AddTstates(3)
+		z80.addTstates(3)
 	}
 	z80.IncPC(1)
 	z80.Q = 0
@@ -2421,9 +2421,9 @@ func instr__JR_NC_OFFSET(z80 *Z80) {
 
 /* LD SP,nnnn */
 func instr__LD_SP_NNNN(z80 *Z80) {
-	b1 := z80.memory.Read(z80.PC())
+	b1 := z80.mRead(z80.PC())
 	z80.IncPC(1)
-	b2 := z80.memory.Read(z80.PC())
+	b2 := z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.SetSP(joinBytes(b2, b1))
 	z80.Q = 0
@@ -2431,43 +2431,43 @@ func instr__LD_SP_NNNN(z80 *Z80) {
 
 /* LD (nnnn),A */
 func instr__LD_iNNNN_A(z80 *Z80) {
-	var wordtemp uint16 = uint16(z80.memory.Read(z80.PC()))
+	var wordtemp uint16 = uint16(z80.mRead(z80.PC()))
 	z80.IncPC(1)
-	wordtemp |= uint16(z80.memory.Read(z80.PC())) << 8
+	wordtemp |= uint16(z80.mRead(z80.PC())) << 8
 	z80.IncPC(1)
-	z80.memory.Write(wordtemp, z80.A)
+	z80.mWrite(wordtemp, z80.A)
 	z80.memptr = (uint16(z80.A) << 8) | ((wordtemp + 1) & 0xff)
 	z80.Q = 0
 }
 
 /* INC SP */
 func instr__INC_SP(z80 *Z80) {
-	z80.AddTstates(2)
+	z80.addTstates(2)
 	z80.IncSP()
 	z80.Q = 0
 }
 
 /* INC (HL) */
 func instr__INC_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
 	z80.inc(&bytetemp)
-	z80.memory.Write(z80.HL(), bytetemp)
+	z80.mWrite(z80.HL(), bytetemp)
 	z80.Q = 0
 }
 
 /* DEC (HL) */
 func instr__DEC_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
 	z80.dec(&bytetemp)
-	z80.memory.Write(z80.HL(), bytetemp)
+	z80.mWrite(z80.HL(), bytetemp)
 	z80.Q = 0
 }
 
 /* LD (HL),nn */
 func instr__LD_iHL_NN(z80 *Z80) {
-	z80.memory.Write(z80.HL(), z80.memory.Read(z80.PC()))
+	z80.mWrite(z80.HL(), z80.mRead(z80.PC()))
 	z80.IncPC(1)
 	z80.Q = 0
 }
@@ -2485,7 +2485,7 @@ func instr__JR_C_OFFSET(z80 *Z80) {
 	if (z80.F & FLAG_C) != 0 {
 		z80.jr()
 	} else {
-		z80.AddTstates(3)
+		z80.addTstates(3)
 	}
 	z80.IncPC(1)
 	z80.Q = 0
@@ -2493,24 +2493,24 @@ func instr__JR_C_OFFSET(z80 *Z80) {
 
 /* ADD HL,SP */
 func instr__ADD_HL_SP(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.add16(z80.hl, z80.SP())
 }
 
 /* LD A,(nnnn) */
 func instr__LD_A_iNNNN(z80 *Z80) {
-	var wordtemp uint16 = uint16(z80.memory.Read(z80.PC()))
+	var wordtemp uint16 = uint16(z80.mRead(z80.PC()))
 	z80.IncPC(1)
-	wordtemp |= uint16(z80.memory.Read(z80.PC())) << 8
+	wordtemp |= uint16(z80.mRead(z80.PC())) << 8
 	z80.IncPC(1)
-	z80.A = z80.memory.Read(wordtemp)
+	z80.A = z80.mRead(wordtemp)
 	z80.memptr = wordtemp + 1
 	z80.Q = 0
 }
 
 /* DEC SP */
 func instr__DEC_SP(z80 *Z80) {
-	z80.AddTstates(2)
+	z80.addTstates(2)
 	z80.DecSP()
 	z80.Q = 0
 }
@@ -2532,7 +2532,7 @@ func instr__DEC_A(z80 *Z80) {
 
 /* LD A,nn */
 func instr__LD_A_NN(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.PC())
+	z80.A = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.Q = 0
 }
@@ -2582,7 +2582,7 @@ func instr__LD_B_L(z80 *Z80) {
 
 /* LD B,(HL) */
 func instr__LD_B_iHL(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.HL())
+	z80.B = z80.mRead(z80.HL())
 	z80.Q = 0
 }
 
@@ -2629,7 +2629,7 @@ func instr__LD_C_L(z80 *Z80) {
 
 /* LD C,(HL) */
 func instr__LD_C_iHL(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.HL())
+	z80.C = z80.mRead(z80.HL())
 	z80.Q = 0
 }
 
@@ -2676,7 +2676,7 @@ func instr__LD_D_L(z80 *Z80) {
 
 /* LD D,(HL) */
 func instr__LD_D_iHL(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.HL())
+	z80.D = z80.mRead(z80.HL())
 	z80.Q = 0
 }
 
@@ -2723,7 +2723,7 @@ func instr__LD_E_L(z80 *Z80) {
 
 /* LD E,(HL) */
 func instr__LD_E_iHL(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.HL())
+	z80.E = z80.mRead(z80.HL())
 	z80.Q = 0
 }
 
@@ -2770,7 +2770,7 @@ func instr__LD_H_L(z80 *Z80) {
 
 /* LD H,(HL) */
 func instr__LD_H_iHL(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.HL())
+	z80.H = z80.mRead(z80.HL())
 	z80.Q = 0
 }
 
@@ -2817,7 +2817,7 @@ func instr__LD_L_L(z80 *Z80) {
 
 /* LD L,(HL) */
 func instr__LD_L_iHL(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.HL())
+	z80.L = z80.mRead(z80.HL())
 	z80.Q = 0
 }
 
@@ -2829,37 +2829,37 @@ func instr__LD_L_A(z80 *Z80) {
 
 /* LD (HL),B */
 func instr__LD_iHL_B(z80 *Z80) {
-	z80.memory.Write(z80.HL(), z80.B)
+	z80.mWrite(z80.HL(), z80.B)
 	z80.Q = 0
 }
 
 /* LD (HL),C */
 func instr__LD_iHL_C(z80 *Z80) {
-	z80.memory.Write(z80.HL(), z80.C)
+	z80.mWrite(z80.HL(), z80.C)
 	z80.Q = 0
 }
 
 /* LD (HL),D */
 func instr__LD_iHL_D(z80 *Z80) {
-	z80.memory.Write(z80.HL(), z80.D)
+	z80.mWrite(z80.HL(), z80.D)
 	z80.Q = 0
 }
 
 /* LD (HL),E */
 func instr__LD_iHL_E(z80 *Z80) {
-	z80.memory.Write(z80.HL(), z80.E)
+	z80.mWrite(z80.HL(), z80.E)
 	z80.Q = 0
 }
 
 /* LD (HL),H */
 func instr__LD_iHL_H(z80 *Z80) {
-	z80.memory.Write(z80.HL(), z80.H)
+	z80.mWrite(z80.HL(), z80.H)
 	z80.Q = 0
 }
 
 /* LD (HL),L */
 func instr__LD_iHL_L(z80 *Z80) {
-	z80.memory.Write(z80.HL(), z80.L)
+	z80.mWrite(z80.HL(), z80.L)
 	z80.Q = 0
 }
 
@@ -2872,7 +2872,7 @@ func instr__HALT(z80 *Z80) {
 
 /* LD (HL),A */
 func instr__LD_iHL_A(z80 *Z80) {
-	z80.memory.Write(z80.HL(), z80.A)
+	z80.mWrite(z80.HL(), z80.A)
 	z80.Q = 0
 }
 
@@ -2914,7 +2914,7 @@ func instr__LD_A_L(z80 *Z80) {
 
 /* LD A,(HL) */
 func instr__LD_A_iHL(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.HL())
+	z80.A = z80.mRead(z80.HL())
 	z80.Q = 0
 }
 
@@ -2955,7 +2955,7 @@ func instr__ADD_A_L(z80 *Z80) {
 
 /* ADD A,(HL) */
 func instr__ADD_A_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
+	var bytetemp byte = z80.mRead(z80.HL())
 	z80.add(bytetemp)
 }
 
@@ -2996,7 +2996,7 @@ func instr__ADC_A_L(z80 *Z80) {
 
 /* ADC A,(HL) */
 func instr__ADC_A_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
+	var bytetemp byte = z80.mRead(z80.HL())
 	z80.adc(bytetemp)
 }
 
@@ -3037,7 +3037,7 @@ func instr__SUB_A_L(z80 *Z80) {
 
 /* SUB A,(HL) */
 func instr__SUB_A_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
+	var bytetemp byte = z80.mRead(z80.HL())
 	z80.sub(bytetemp)
 }
 
@@ -3078,7 +3078,7 @@ func instr__SBC_A_L(z80 *Z80) {
 
 /* SBC A,(HL) */
 func instr__SBC_A_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
+	var bytetemp byte = z80.mRead(z80.HL())
 	z80.sbc(bytetemp)
 }
 
@@ -3119,7 +3119,7 @@ func instr__AND_A_L(z80 *Z80) {
 
 /* AND A,(HL) */
 func instr__AND_A_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
+	var bytetemp byte = z80.mRead(z80.HL())
 	z80.and(bytetemp)
 }
 
@@ -3160,7 +3160,7 @@ func instr__XOR_A_L(z80 *Z80) {
 
 /* XOR A,(HL) */
 func instr__XOR_A_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
+	var bytetemp byte = z80.mRead(z80.HL())
 
 	z80.xor(bytetemp)
 }
@@ -3202,7 +3202,7 @@ func instr__OR_A_L(z80 *Z80) {
 
 /* OR A,(HL) */
 func instr__OR_A_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
+	var bytetemp byte = z80.mRead(z80.HL())
 	z80.or(bytetemp)
 }
 
@@ -3243,7 +3243,7 @@ func instr__CP_L(z80 *Z80) {
 
 /* CP (HL) */
 func instr__CP_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
+	var bytetemp byte = z80.mRead(z80.HL())
 	z80.cp(bytetemp)
 }
 
@@ -3254,7 +3254,7 @@ func instr__CP_A(z80 *Z80) {
 
 /* RET NZ */
 func instr__RET_NZ(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	if !((z80.F & FLAG_Z) != 0) {
 		z80.ret()
 	}
@@ -3287,28 +3287,28 @@ func instr__CALL_NZ_NNNN(z80 *Z80) {
 
 /* PUSH BC */
 func instr__PUSH_BC(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.push16(z80.C, z80.B)
 	z80.Q = 0
 }
 
 /* ADD A,nn */
 func instr__ADD_A_NN(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.PC())
+	var bytetemp byte = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.add(bytetemp)
 }
 
 /* RST 00 */
 func instr__RST_00(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.rst(0x00)
 	z80.Q = 0
 }
 
 /* RET Z */
 func instr__RET_Z(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	if (z80.F & FLAG_Z) != 0 {
 		z80.ret()
 	}
@@ -3346,21 +3346,21 @@ func instr__CALL_NNNN(z80 *Z80) {
 
 /* ADC A,nn */
 func instr__ADC_A_NN(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.PC())
+	var bytetemp byte = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.adc(bytetemp)
 }
 
 /* RST 8 */
 func instr__RST_8(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.rst(0x8)
 	z80.Q = 0
 }
 
 /* RET NC */
 func instr__RET_NC(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	if !((z80.F & FLAG_C) != 0) {
 		z80.ret()
 	}
@@ -3381,11 +3381,11 @@ func instr__JP_NC_NNNN(z80 *Z80) {
 
 /* OUT (nn),A */
 func instr__OUT_iNN_A(z80 *Z80) {
-	var port byte = z80.memory.Read(z80.PC())
+	var port byte = z80.mRead(z80.PC())
 	var outtemp uint16 = uint16(port) + (uint16(z80.A) << 8)
 	z80.memptr = (uint16(z80.A) << 8) | uint16(port+1)
 	z80.IncPC(1)
-	z80.writePort(outtemp, z80.A)
+	z80.pWrite(outtemp, z80.A)
 	z80.Q = 0
 }
 
@@ -3397,28 +3397,28 @@ func instr__CALL_NC_NNNN(z80 *Z80) {
 
 /* PUSH DE */
 func instr__PUSH_DE(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.push16(z80.E, z80.D)
 	z80.Q = 0
 }
 
 /* SUB nn */
 func instr__SUB_NN(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.PC())
+	var bytetemp byte = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.sub(bytetemp)
 }
 
 /* RST 10 */
 func instr__RST_10(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.rst(0x10)
 	z80.Q = 0
 }
 
 /* RET C */
 func instr__RET_C(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	if (z80.F & FLAG_C) != 0 {
 		z80.ret()
 	}
@@ -3449,9 +3449,9 @@ func instr__JP_C_NNNN(z80 *Z80) {
 
 /* IN A,(nn) */
 func instr__IN_A_iNN(z80 *Z80) {
-	var intemp uint16 = uint16(z80.memory.Read(z80.PC())) + (uint16(z80.A) << 8)
+	var intemp uint16 = uint16(z80.mRead(z80.PC())) + (uint16(z80.A) << 8)
 	z80.IncPC(1)
-	z80.A = z80.readPort(intemp)
+	z80.A = z80.pRead(intemp)
 	z80.memptr = intemp + 1
 	// this operator does not affect F register
 	z80.Q = 0
@@ -3470,21 +3470,21 @@ func instr__SHIFT_DD(z80 *Z80) {
 
 /* SBC A,nn */
 func instr__SBC_A_NN(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.PC())
+	var bytetemp byte = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.sbc(bytetemp)
 }
 
 /* RST 18 */
 func instr__RST_18(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.rst(0x18)
 	z80.Q = 0
 }
 
 /* RET PO */
 func instr__RET_PO(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	if !((z80.F & FLAG_P) != 0) {
 		z80.ret()
 	}
@@ -3505,12 +3505,12 @@ func instr__JP_PO_NNNN(z80 *Z80) {
 
 /* EX (SP),HL */
 func instr__EX_iSP_HL(z80 *Z80) {
-	var bytetempl = z80.memory.Read(z80.SP())
-	var bytetemph = z80.memory.Read(z80.SP() + 1)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.SP()+1, z80.H)
-	z80.memory.Write(z80.SP(), z80.L)
-	z80.AddTstates(2)
+	var bytetempl = z80.mRead(z80.SP())
+	var bytetemph = z80.mRead(z80.SP() + 1)
+	z80.addTstates(1)
+	z80.mWrite(z80.SP()+1, z80.H)
+	z80.mWrite(z80.SP(), z80.L)
+	z80.addTstates(2)
 	z80.L = bytetempl
 	z80.H = bytetemph
 	z80.memptr = z80.HL()
@@ -3525,28 +3525,28 @@ func instr__CALL_PO_NNNN(z80 *Z80) {
 
 /* PUSH HL */
 func instr__PUSH_HL(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.push16(z80.L, z80.H)
 	z80.Q = 0
 }
 
 /* AND nn */
 func instr__AND_NN(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.PC())
+	var bytetemp byte = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.and(bytetemp)
 }
 
 /* RST 20 */
 func instr__RST_20(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.rst(0x20)
 	z80.Q = 0
 }
 
 /* RET PE */
 func instr__RET_PE(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	if (z80.F & FLAG_P) != 0 {
 		z80.ret()
 	}
@@ -3586,21 +3586,21 @@ func instr__SHIFT_ED(z80 *Z80) {
 
 /* XOR A,nn */
 func instr__XOR_A_NN(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.PC())
+	var bytetemp byte = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.xor(bytetemp)
 }
 
 /* RST 28 */
 func instr__RST_28(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.rst(0x28)
 	z80.Q = 0
 }
 
 /* RET P */
 func instr__RET_P(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	if !((z80.F & FLAG_S) != 0) {
 		z80.ret()
 	}
@@ -3633,28 +3633,28 @@ func instr__CALL_P_NNNN(z80 *Z80) {
 
 /* PUSH AF */
 func instr__PUSH_AF(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.push16(z80.F, z80.A)
 	z80.Q = 0
 }
 
 /* OR nn */
 func instr__OR_NN(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.PC())
+	var bytetemp byte = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.or(bytetemp)
 }
 
 /* RST 30 */
 func instr__RST_30(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.rst(0x30)
 	z80.Q = 0
 }
 
 /* RET M */
 func instr__RET_M(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	if (z80.F & FLAG_S) != 0 {
 		z80.ret()
 	}
@@ -3663,7 +3663,7 @@ func instr__RET_M(z80 *Z80) {
 
 /* LD SP,HL */
 func instr__LD_SP_HL(z80 *Z80) {
-	z80.AddTstates(2)
+	z80.addTstates(2)
 	z80.SetSP(z80.HL())
 	z80.Q = 0
 }
@@ -3679,7 +3679,7 @@ func instr__EI(z80 *Z80) {
 	// Interrupts are not accepted immediately after an EI,
 	// but are accepted after the next instruction
 	z80.IFF1, z80.IFF2 = 1, 1
-	z80.interruptsEnabledAt = int(z80.Tstates)
+	z80.interruptsEnabledAt = int(z80.tstates)
 	z80.Q = 0
 }
 
@@ -3696,14 +3696,14 @@ func instr__SHIFT_FD(z80 *Z80) {
 
 /* CP nn */
 func instr__CP_NN(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.PC())
+	var bytetemp byte = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.cp(bytetemp)
 }
 
 /* RST 38 */
 func instr__RST_38(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.rst(0x38)
 	z80.Q = 0
 }
@@ -3740,10 +3740,10 @@ func instrCB__RLC_L(z80 *Z80) {
 
 /* RLC (HL) */
 func instrCB__RLC_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
 	bytetemp = z80.rlc(bytetemp)
-	z80.memory.Write(z80.HL(), bytetemp)
+	z80.mWrite(z80.HL(), bytetemp)
 }
 
 /* RLC A */
@@ -3783,10 +3783,10 @@ func instrCB__RRC_L(z80 *Z80) {
 
 /* RRC (HL) */
 func instrCB__RRC_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
 	bytetemp = z80.rrc(bytetemp)
-	z80.memory.Write(z80.HL(), bytetemp)
+	z80.mWrite(z80.HL(), bytetemp)
 }
 
 /* RRC A */
@@ -3826,10 +3826,10 @@ func instrCB__RL_L(z80 *Z80) {
 
 /* RL (HL) */
 func instrCB__RL_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
 	bytetemp = z80.rl(bytetemp)
-	z80.memory.Write(z80.HL(), bytetemp)
+	z80.mWrite(z80.HL(), bytetemp)
 }
 
 /* RL A */
@@ -3869,10 +3869,10 @@ func instrCB__RR_L(z80 *Z80) {
 
 /* RR (HL) */
 func instrCB__RR_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
 	bytetemp = z80.rr(bytetemp)
-	z80.memory.Write(z80.HL(), bytetemp)
+	z80.mWrite(z80.HL(), bytetemp)
 }
 
 /* RR A */
@@ -3912,10 +3912,10 @@ func instrCB__SLA_L(z80 *Z80) {
 
 /* SLA (HL) */
 func instrCB__SLA_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
 	bytetemp = z80.sla(bytetemp)
-	z80.memory.Write(z80.HL(), bytetemp)
+	z80.mWrite(z80.HL(), bytetemp)
 }
 
 /* SLA A */
@@ -3955,10 +3955,10 @@ func instrCB__SRA_L(z80 *Z80) {
 
 /* SRA (HL) */
 func instrCB__SRA_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
 	bytetemp = z80.sra(bytetemp)
-	z80.memory.Write(z80.HL(), bytetemp)
+	z80.mWrite(z80.HL(), bytetemp)
 }
 
 /* SRA A */
@@ -3998,10 +3998,10 @@ func instrCB__SLL_L(z80 *Z80) {
 
 /* SLL (HL) */
 func instrCB__SLL_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
 	bytetemp = z80.sll(bytetemp)
-	z80.memory.Write(z80.HL(), bytetemp)
+	z80.mWrite(z80.HL(), bytetemp)
 }
 
 /* SLL A */
@@ -4041,10 +4041,10 @@ func instrCB__SRL_L(z80 *Z80) {
 
 /* SRL (HL) */
 func instrCB__SRL_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
 	bytetemp = z80.srl(bytetemp)
-	z80.memory.Write(z80.HL(), bytetemp)
+	z80.mWrite(z80.HL(), bytetemp)
 }
 
 /* SRL A */
@@ -4084,8 +4084,8 @@ func instrCB__BIT_0_L(z80 *Z80) {
 
 /* BIT 0,(HL) */
 func instrCB__BIT_0_iHL(z80 *Z80) {
-	bytetemp := z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	bytetemp := z80.mRead(z80.HL())
+	z80.addTstates(1)
 	z80.bit_memptr(0, bytetemp)
 }
 
@@ -4126,8 +4126,8 @@ func instrCB__BIT_1_L(z80 *Z80) {
 
 /* BIT 1,(HL) */
 func instrCB__BIT_1_iHL(z80 *Z80) {
-	bytetemp := z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	bytetemp := z80.mRead(z80.HL())
+	z80.addTstates(1)
 	z80.bit_memptr(1, bytetemp)
 }
 
@@ -4168,8 +4168,8 @@ func instrCB__BIT_2_L(z80 *Z80) {
 
 /* BIT 2,(HL) */
 func instrCB__BIT_2_iHL(z80 *Z80) {
-	bytetemp := z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	bytetemp := z80.mRead(z80.HL())
+	z80.addTstates(1)
 	z80.bit_memptr(2, bytetemp)
 }
 
@@ -4210,8 +4210,8 @@ func instrCB__BIT_3_L(z80 *Z80) {
 
 /* BIT 3,(HL) */
 func instrCB__BIT_3_iHL(z80 *Z80) {
-	bytetemp := z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	bytetemp := z80.mRead(z80.HL())
+	z80.addTstates(1)
 	z80.bit_memptr(3, bytetemp)
 }
 
@@ -4252,8 +4252,8 @@ func instrCB__BIT_4_L(z80 *Z80) {
 
 /* BIT 4,(HL) */
 func instrCB__BIT_4_iHL(z80 *Z80) {
-	bytetemp := z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	bytetemp := z80.mRead(z80.HL())
+	z80.addTstates(1)
 	z80.bit_memptr(4, bytetemp)
 }
 
@@ -4294,8 +4294,8 @@ func instrCB__BIT_5_L(z80 *Z80) {
 
 /* BIT 5,(HL) */
 func instrCB__BIT_5_iHL(z80 *Z80) {
-	bytetemp := z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	bytetemp := z80.mRead(z80.HL())
+	z80.addTstates(1)
 	z80.bit_memptr(5, bytetemp)
 }
 
@@ -4336,8 +4336,8 @@ func instrCB__BIT_6_L(z80 *Z80) {
 
 /* BIT 6,(HL) */
 func instrCB__BIT_6_iHL(z80 *Z80) {
-	bytetemp := z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	bytetemp := z80.mRead(z80.HL())
+	z80.addTstates(1)
 	z80.bit_memptr(6, bytetemp)
 }
 
@@ -4378,8 +4378,8 @@ func instrCB__BIT_7_L(z80 *Z80) {
 
 /* BIT 7,(HL) */
 func instrCB__BIT_7_iHL(z80 *Z80) {
-	bytetemp := z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
+	bytetemp := z80.mRead(z80.HL())
+	z80.addTstates(1)
 	z80.bit_memptr(7, bytetemp)
 }
 
@@ -4426,9 +4426,9 @@ func instrCB__RES_0_L(z80 *Z80) {
 
 /* RES 0,(HL) */
 func instrCB__RES_0_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
-	z80.memory.Write(z80.HL(), bytetemp&0xfe)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
+	z80.mWrite(z80.HL(), bytetemp&0xfe)
 	z80.Q = 0
 }
 
@@ -4476,9 +4476,9 @@ func instrCB__RES_1_L(z80 *Z80) {
 
 /* RES 1,(HL) */
 func instrCB__RES_1_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
-	z80.memory.Write(z80.HL(), bytetemp&0xfd)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
+	z80.mWrite(z80.HL(), bytetemp&0xfd)
 	z80.Q = 0
 }
 
@@ -4526,9 +4526,9 @@ func instrCB__RES_2_L(z80 *Z80) {
 
 /* RES 2,(HL) */
 func instrCB__RES_2_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
-	z80.memory.Write(z80.HL(), bytetemp&0xfb)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
+	z80.mWrite(z80.HL(), bytetemp&0xfb)
 	z80.Q = 0
 }
 
@@ -4576,9 +4576,9 @@ func instrCB__RES_3_L(z80 *Z80) {
 
 /* RES 3,(HL) */
 func instrCB__RES_3_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
-	z80.memory.Write(z80.HL(), bytetemp&0xf7)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
+	z80.mWrite(z80.HL(), bytetemp&0xf7)
 	z80.Q = 0
 }
 
@@ -4626,9 +4626,9 @@ func instrCB__RES_4_L(z80 *Z80) {
 
 /* RES 4,(HL) */
 func instrCB__RES_4_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
-	z80.memory.Write(z80.HL(), bytetemp&0xef)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
+	z80.mWrite(z80.HL(), bytetemp&0xef)
 	z80.Q = 0
 }
 
@@ -4676,9 +4676,9 @@ func instrCB__RES_5_L(z80 *Z80) {
 
 /* RES 5,(HL) */
 func instrCB__RES_5_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
-	z80.memory.Write(z80.HL(), bytetemp&0xdf)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
+	z80.mWrite(z80.HL(), bytetemp&0xdf)
 	z80.Q = 0
 }
 
@@ -4726,9 +4726,9 @@ func instrCB__RES_6_L(z80 *Z80) {
 
 /* RES 6,(HL) */
 func instrCB__RES_6_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
-	z80.memory.Write(z80.HL(), bytetemp&0xbf)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
+	z80.mWrite(z80.HL(), bytetemp&0xbf)
 	z80.Q = 0
 }
 
@@ -4776,9 +4776,9 @@ func instrCB__RES_7_L(z80 *Z80) {
 
 /* RES 7,(HL) */
 func instrCB__RES_7_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
-	z80.memory.Write(z80.HL(), bytetemp&0x7f)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
+	z80.mWrite(z80.HL(), bytetemp&0x7f)
 	z80.Q = 0
 }
 
@@ -4826,9 +4826,9 @@ func instrCB__SET_0_L(z80 *Z80) {
 
 /* SET 0,(HL) */
 func instrCB__SET_0_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
-	z80.memory.Write(z80.HL(), bytetemp|0x01)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
+	z80.mWrite(z80.HL(), bytetemp|0x01)
 	z80.Q = 0
 }
 
@@ -4876,9 +4876,9 @@ func instrCB__SET_1_L(z80 *Z80) {
 
 /* SET 1,(HL) */
 func instrCB__SET_1_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
-	z80.memory.Write(z80.HL(), bytetemp|0x02)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
+	z80.mWrite(z80.HL(), bytetemp|0x02)
 	z80.Q = 0
 }
 
@@ -4926,9 +4926,9 @@ func instrCB__SET_2_L(z80 *Z80) {
 
 /* SET 2,(HL) */
 func instrCB__SET_2_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
-	z80.memory.Write(z80.HL(), bytetemp|0x04)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
+	z80.mWrite(z80.HL(), bytetemp|0x04)
 	z80.Q = 0
 }
 
@@ -4976,9 +4976,9 @@ func instrCB__SET_3_L(z80 *Z80) {
 
 /* SET 3,(HL) */
 func instrCB__SET_3_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
-	z80.memory.Write(z80.HL(), bytetemp|0x08)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
+	z80.mWrite(z80.HL(), bytetemp|0x08)
 	z80.Q = 0
 }
 
@@ -5026,9 +5026,9 @@ func instrCB__SET_4_L(z80 *Z80) {
 
 /* SET 4,(HL) */
 func instrCB__SET_4_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
-	z80.memory.Write(z80.HL(), bytetemp|0x10)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
+	z80.mWrite(z80.HL(), bytetemp|0x10)
 	z80.Q = 0
 }
 
@@ -5076,9 +5076,9 @@ func instrCB__SET_5_L(z80 *Z80) {
 
 /* SET 5,(HL) */
 func instrCB__SET_5_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
-	z80.memory.Write(z80.HL(), bytetemp|0x20)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
+	z80.mWrite(z80.HL(), bytetemp|0x20)
 	z80.Q = 0
 }
 
@@ -5126,9 +5126,9 @@ func instrCB__SET_6_L(z80 *Z80) {
 
 /* SET 6,(HL) */
 func instrCB__SET_6_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
-	z80.memory.Write(z80.HL(), bytetemp|0x40)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
+	z80.mWrite(z80.HL(), bytetemp|0x40)
 	z80.Q = 0
 }
 
@@ -5176,9 +5176,9 @@ func instrCB__SET_7_L(z80 *Z80) {
 
 /* SET 7,(HL) */
 func instrCB__SET_7_iHL(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(1)
-	z80.memory.Write(z80.HL(), bytetemp|0x80)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(1)
+	z80.mWrite(z80.HL(), bytetemp|0x80)
 	z80.Q = 0
 }
 
@@ -5195,14 +5195,14 @@ func instrED__IN_B_iC(z80 *Z80) {
 
 /* OUT (C),B */
 func instrED__OUT_iC_B(z80 *Z80) {
-	z80.writePort(z80.BC(), z80.B)
+	z80.pWrite(z80.BC(), z80.B)
 	z80.memptr = z80.BC() + 1
 	z80.Q = 0
 }
 
 /* SBC HL,BC */
 func instrED__SBC_HL_BC(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.sbc16(z80.BC())
 }
 
@@ -5234,7 +5234,7 @@ func instrED__IM_0(z80 *Z80) {
 
 /* LD I,A */
 func instrED__LD_I_A(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.I = z80.A
 	z80.Q = 0
 }
@@ -5246,14 +5246,14 @@ func instrED__IN_C_iC(z80 *Z80) {
 
 /* OUT (C),C */
 func instrED__OUT_iC_C(z80 *Z80) {
-	z80.writePort(z80.BC(), z80.C)
+	z80.pWrite(z80.BC(), z80.C)
 	z80.memptr = z80.BC() + 1
 	z80.Q = 0
 }
 
 /* ADC HL,BC */
 func instrED__ADC_HL_BC(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.adc16(z80.BC())
 }
 
@@ -5265,7 +5265,7 @@ func instrED__LD_BC_iNNNN(z80 *Z80) {
 
 /* LD R,A */
 func instrED__LD_R_A(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	/* Keep the RZX instruction counter right */
 	z80.rzxInstructionsOffset += (int(z80.R) - int(z80.A))
 	z80.R, z80.R7 = uint16(z80.A), z80.A
@@ -5279,14 +5279,14 @@ func instrED__IN_D_iC(z80 *Z80) {
 
 /* OUT (C),D */
 func instrED__OUT_iC_D(z80 *Z80) {
-	z80.writePort(z80.BC(), z80.D)
+	z80.pWrite(z80.BC(), z80.D)
 	z80.memptr = z80.BC() + 1
 	z80.Q = 0
 }
 
 /* SBC HL,DE */
 func instrED__SBC_HL_DE(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.sbc16(z80.DE())
 }
 
@@ -5304,7 +5304,7 @@ func instrED__IM_1(z80 *Z80) {
 
 /* LD A,I */
 func instrED__LD_A_I(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.A = z80.I
 	z80.F = (z80.F & FLAG_C) | sz53Table[z80.A] | ternOpB(z80.IFF2 != 0, FLAG_V, 0)
 	z80.Q = z80.F
@@ -5317,14 +5317,14 @@ func instrED__IN_E_iC(z80 *Z80) {
 
 /* OUT (C),E */
 func instrED__OUT_iC_E(z80 *Z80) {
-	z80.writePort(z80.BC(), z80.E)
+	z80.pWrite(z80.BC(), z80.E)
 	z80.memptr = z80.BC() + 1
 	z80.Q = 0
 }
 
 /* ADC HL,DE */
 func instrED__ADC_HL_DE(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.adc16(z80.DE())
 }
 
@@ -5342,7 +5342,7 @@ func instrED__IM_2(z80 *Z80) {
 
 /* LD A,R */
 func instrED__LD_A_R(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.A = byte(z80.R&0x7f) | (z80.R7 & 0x80)
 	z80.F = (z80.F & FLAG_C) | sz53Table[z80.A] | ternOpB(z80.IFF2 != 0, FLAG_V, 0)
 	z80.Q = z80.F
@@ -5355,14 +5355,14 @@ func instrED__IN_H_iC(z80 *Z80) {
 
 /* OUT (C),H */
 func instrED__OUT_iC_H(z80 *Z80) {
-	z80.writePort(z80.BC(), z80.H)
+	z80.pWrite(z80.BC(), z80.H)
 	z80.memptr = z80.BC() + 1
 	z80.Q = 0
 }
 
 /* SBC HL,HL */
 func instrED__SBC_HL_HL(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.sbc16(z80.HL())
 }
 
@@ -5374,9 +5374,9 @@ func instrED__LD_iNNNN_HL(z80 *Z80) {
 
 /* RRD */
 func instrED__RRD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(4)
-	z80.memory.Write(z80.HL(), (z80.A<<4)|(bytetemp>>4))
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(4)
+	z80.mWrite(z80.HL(), (z80.A<<4)|(bytetemp>>4))
 	z80.A = (z80.A & 0xf0) | (bytetemp & 0x0f)
 	z80.F = (z80.F & FLAG_C) | sz53pTable[z80.A]
 	z80.Q = z80.F
@@ -5390,14 +5390,14 @@ func instrED__IN_L_iC(z80 *Z80) {
 
 /* OUT (C),L */
 func instrED__OUT_iC_L(z80 *Z80) {
-	z80.writePort(z80.BC(), z80.L)
+	z80.pWrite(z80.BC(), z80.L)
 	z80.memptr = z80.BC() + 1
 	z80.Q = 0
 }
 
 /* ADC HL,HL */
 func instrED__ADC_HL_HL(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.adc16(z80.HL())
 }
 
@@ -5409,9 +5409,9 @@ func instrED__LD_HL_iNNNN(z80 *Z80) {
 
 /* RLD */
 func instrED__RLD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.AddTstates(4)
-	z80.memory.Write(z80.HL(), (bytetemp<<4)|(z80.A&0x0f))
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.addTstates(4)
+	z80.mWrite(z80.HL(), (bytetemp<<4)|(z80.A&0x0f))
 	z80.A = (z80.A & 0xf0) | (bytetemp >> 4)
 	z80.F = (z80.F & FLAG_C) | sz53pTable[z80.A]
 	z80.Q = z80.F
@@ -5426,14 +5426,14 @@ func instrED__IN_F_iC(z80 *Z80) {
 
 /* OUT (C),0 */
 func instrED__OUT_iC_0(z80 *Z80) {
-	z80.writePort(z80.BC(), 0)
+	z80.pWrite(z80.BC(), 0)
 	z80.memptr = z80.BC() + 1
 	z80.Q = 0
 }
 
 /* SBC HL,SP */
 func instrED__SBC_HL_SP(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.sbc16(z80.SP())
 }
 
@@ -5452,14 +5452,14 @@ func instrED__IN_A_iC(z80 *Z80) {
 
 /* OUT (C),A */
 func instrED__OUT_iC_A(z80 *Z80) {
-	z80.writePort(z80.BC(), z80.A)
+	z80.pWrite(z80.BC(), z80.A)
 	z80.memptr = z80.BC() + 1
 	z80.Q = 0
 }
 
 /* ADC HL,SP */
 func instrED__ADC_HL_SP(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.adc16(z80.SP())
 }
 
@@ -5473,10 +5473,10 @@ func instrED__LD_SP_iNNNN(z80 *Z80) {
 
 /* LDI */
 func instrED__LDI(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
+	var bytetemp byte = z80.mRead(z80.HL())
 	z80.DecBC()
-	z80.memory.Write(z80.DE(), bytetemp)
-	z80.AddTstates(2)
+	z80.mWrite(z80.DE(), bytetemp)
+	z80.addTstates(2)
 	z80.IncDE()
 	z80.IncHL()
 	bytetemp += z80.A
@@ -5489,10 +5489,10 @@ func instrED__LDI(z80 *Z80) {
 
 /* CPI */
 func instrED__CPI(z80 *Z80) {
-	var value byte = z80.memory.Read(z80.HL())
+	var value byte = z80.mRead(z80.HL())
 	var bytetemp byte = z80.A - value
 	var lookup byte = ((z80.A & 0x08) >> 3) | (((value) & 0x08) >> 2) | ((bytetemp & 0x08) >> 1)
-	z80.AddTstates(5)
+	z80.addTstates(5)
 	z80.IncHL()
 	z80.DecBC()
 	z80.F = (z80.F & FLAG_C) | ternOpB(z80.BC() != 0, FLAG_V|FLAG_N, FLAG_N) | halfcarrySubTable[lookup] | ternOpB(bytetemp != 0, 0, FLAG_Z) | (bytetemp & FLAG_S)
@@ -5506,9 +5506,9 @@ func instrED__CPI(z80 *Z80) {
 
 /* INI */
 func instrED__INI(z80 *Z80) {
-	z80.AddTstates(1)
-	var initemp byte = z80.readPort(z80.BC())
-	z80.memory.Write(z80.HL(), initemp)
+	z80.addTstates(1)
+	var initemp byte = z80.pRead(z80.BC())
+	z80.mWrite(z80.HL(), initemp)
 	z80.memptr = z80.BC() + 1
 	z80.B--
 	z80.IncHL()
@@ -5522,11 +5522,11 @@ func instrED__INI(z80 *Z80) {
 
 /* OUTI */
 func instrED__OUTI(z80 *Z80) {
-	z80.AddTstates(1)
-	var outitemp byte = z80.memory.Read(z80.HL())
+	z80.addTstates(1)
+	var outitemp byte = z80.mRead(z80.HL())
 	z80.B-- /* This does happen first, despite what the specs say */
 	z80.memptr = z80.BC() + 1
-	z80.writePort(z80.BC(), outitemp)
+	z80.pWrite(z80.BC(), outitemp)
 
 	z80.IncHL()
 	var outitemp2 byte = outitemp + z80.L
@@ -5539,10 +5539,10 @@ func instrED__OUTI(z80 *Z80) {
 
 /* LDD */
 func instrED__LDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
+	var bytetemp byte = z80.mRead(z80.HL())
 	z80.DecBC()
-	z80.memory.Write(z80.DE(), bytetemp)
-	z80.AddTstates(2)
+	z80.mWrite(z80.DE(), bytetemp)
+	z80.addTstates(2)
 	z80.DecDE()
 	z80.DecHL()
 	bytetemp += z80.A
@@ -5555,10 +5555,10 @@ func instrED__LDD(z80 *Z80) {
 
 /* CPD */
 func instrED__CPD(z80 *Z80) {
-	var value byte = z80.memory.Read(z80.HL())
+	var value byte = z80.mRead(z80.HL())
 	var bytetemp byte = z80.A - value
 	var lookup byte = ((z80.A & 0x08) >> 3) | (((value) & 0x08) >> 2) | ((bytetemp & 0x08) >> 1)
-	z80.AddTstates(5)
+	z80.addTstates(5)
 	z80.DecHL()
 	z80.DecBC()
 	z80.F = (z80.F & FLAG_C) | ternOpB(z80.BC() != 0, FLAG_V|FLAG_N, FLAG_N) | halfcarrySubTable[lookup] | ternOpB(bytetemp != 0, 0, FLAG_Z) | (bytetemp & FLAG_S)
@@ -5572,9 +5572,9 @@ func instrED__CPD(z80 *Z80) {
 
 /* IND */
 func instrED__IND(z80 *Z80) {
-	z80.AddTstates(1)
-	var initemp byte = z80.readPort(z80.BC())
-	z80.memory.Write(z80.HL(), initemp)
+	z80.addTstates(1)
+	var initemp byte = z80.pRead(z80.BC())
+	z80.mWrite(z80.HL(), initemp)
 	z80.memptr = z80.BC() - 1
 	z80.B--
 	z80.DecHL()
@@ -5588,11 +5588,11 @@ func instrED__IND(z80 *Z80) {
 
 /* OUTD */
 func instrED__OUTD(z80 *Z80) {
-	z80.AddTstates(1)
-	var outitemp byte = z80.memory.Read(z80.HL())
+	z80.addTstates(1)
+	var outitemp byte = z80.mRead(z80.HL())
 	z80.B-- /* This does happen first, despite what the specs say */
 	z80.memptr = z80.BC() - 1
-	z80.writePort(z80.BC(), outitemp)
+	z80.pWrite(z80.BC(), outitemp)
 
 	z80.DecHL()
 	var outitemp2 byte = outitemp + z80.L
@@ -5605,15 +5605,15 @@ func instrED__OUTD(z80 *Z80) {
 
 /* LDIR */
 func instrED__LDIR(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.memory.Write(z80.DE(), bytetemp)
-	z80.AddTstates(2)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.mWrite(z80.DE(), bytetemp)
+	z80.addTstates(2)
 	z80.DecBC()
 	bytetemp += z80.A
 	z80.F = (z80.F & (FLAG_C | FLAG_Z | FLAG_S)) | ternOpB(z80.BC() != 0, FLAG_V, 0) | (bytetemp & FLAG_3) | ternOpB((bytetemp&0x02 != 0), FLAG_5, 0)
 	z80.Q = z80.F
 	if z80.BC() != 0 {
-		z80.AddTstates(5)
+		z80.addTstates(5)
 		z80.DecPC(2)
 		z80.memptr = z80.pc + 1
 	}
@@ -5623,10 +5623,10 @@ func instrED__LDIR(z80 *Z80) {
 
 /* CPIR */
 func instrED__CPIR(z80 *Z80) {
-	var value byte = z80.memory.Read(z80.HL())
+	var value byte = z80.mRead(z80.HL())
 	var bytetemp byte = z80.A - value
 	var lookup byte = ((z80.A & 0x08) >> 3) | (((value) & 0x08) >> 2) | ((bytetemp & 0x08) >> 1)
-	z80.AddTstates(5)
+	z80.addTstates(5)
 	z80.DecBC()
 	z80.F = (z80.F & FLAG_C) | (ternOpB(z80.BC() != 0, (FLAG_V | FLAG_N), FLAG_N)) | halfcarrySubTable[lookup] | (ternOpB(bytetemp != 0, 0, FLAG_Z)) | (bytetemp & FLAG_S)
 	if (z80.F & FLAG_H) != 0 {
@@ -5636,7 +5636,7 @@ func instrED__CPIR(z80 *Z80) {
 	z80.Q = z80.F
 	z80.memptr++
 	if (z80.F & (FLAG_V | FLAG_Z)) == FLAG_V {
-		z80.AddTstates(5)
+		z80.addTstates(5)
 		z80.DecPC(2)
 		z80.memptr = z80.pc + 1
 	}
@@ -5645,9 +5645,9 @@ func instrED__CPIR(z80 *Z80) {
 
 /* INIR */
 func instrED__INIR(z80 *Z80) {
-	z80.AddTstates(1)
-	var initemp byte = z80.readPort(z80.BC())
-	z80.memory.Write(z80.HL(), initemp)
+	z80.addTstates(1)
+	var initemp byte = z80.pRead(z80.BC())
+	z80.mWrite(z80.HL(), initemp)
 	z80.memptr = z80.BC() + 1
 	z80.B--
 	var initemp2 byte = initemp + z80.C + 1
@@ -5657,7 +5657,7 @@ func instrED__INIR(z80 *Z80) {
 		sz53Table[z80.B]
 	z80.Q = z80.F
 	if z80.B != 0 {
-		z80.AddTstates(5)
+		z80.addTstates(5)
 		z80.DecPC(2)
 	}
 	z80.IncHL()
@@ -5665,11 +5665,11 @@ func instrED__INIR(z80 *Z80) {
 
 /* OTIR */
 func instrED__OTIR(z80 *Z80) {
-	z80.AddTstates(1)
-	var outitemp byte = z80.memory.Read(z80.HL())
+	z80.addTstates(1)
+	var outitemp byte = z80.mRead(z80.HL())
 	z80.B-- /* This does happen first, despite what the specs say */
 	z80.memptr = z80.BC() + 1
-	z80.writePort(z80.BC(), outitemp)
+	z80.pWrite(z80.BC(), outitemp)
 
 	z80.IncHL()
 	var outitemp2 byte = outitemp + z80.L
@@ -5681,22 +5681,22 @@ func instrED__OTIR(z80 *Z80) {
 	z80.Q = z80.F
 
 	if z80.B != 0 {
-		z80.AddTstates(5)
+		z80.addTstates(5)
 		z80.DecPC(2)
 	}
 }
 
 /* LDDR */
 func instrED__LDDR(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.HL())
-	z80.memory.Write(z80.DE(), bytetemp)
-	z80.AddTstates(2)
+	var bytetemp byte = z80.mRead(z80.HL())
+	z80.mWrite(z80.DE(), bytetemp)
+	z80.addTstates(2)
 	z80.DecBC()
 	bytetemp += z80.A
 	z80.F = (z80.F & (FLAG_C | FLAG_Z | FLAG_S)) | ternOpB(z80.BC() != 0, FLAG_V, 0) | (bytetemp & FLAG_3) | ternOpB((bytetemp&0x02 != 0), FLAG_5, 0)
 	z80.Q = z80.F
 	if z80.BC() != 0 {
-		z80.AddTstates(5)
+		z80.addTstates(5)
 		z80.DecPC(2)
 		z80.memptr = z80.pc + 1
 	}
@@ -5706,10 +5706,10 @@ func instrED__LDDR(z80 *Z80) {
 
 /* CPDR */
 func instrED__CPDR(z80 *Z80) {
-	var value byte = z80.memory.Read(z80.HL())
+	var value byte = z80.mRead(z80.HL())
 	var bytetemp byte = z80.A - value
 	var lookup byte = ((z80.A & 0x08) >> 3) | (((value) & 0x08) >> 2) | ((bytetemp & 0x08) >> 1)
-	z80.AddTstates(5)
+	z80.addTstates(5)
 	z80.DecBC()
 	z80.F = (z80.F & FLAG_C) | (ternOpB(z80.BC() != 0, (FLAG_V | FLAG_N), FLAG_N)) | halfcarrySubTable[lookup] | (ternOpB(bytetemp != 0, 0, FLAG_Z)) | (bytetemp & FLAG_S)
 	if (z80.F & FLAG_H) != 0 {
@@ -5719,7 +5719,7 @@ func instrED__CPDR(z80 *Z80) {
 	z80.Q = z80.F
 	z80.memptr--
 	if (z80.F & (FLAG_V | FLAG_Z)) == FLAG_V {
-		z80.AddTstates(5)
+		z80.addTstates(5)
 		z80.DecPC(2)
 		z80.memptr = z80.pc + 1
 	}
@@ -5728,9 +5728,9 @@ func instrED__CPDR(z80 *Z80) {
 
 /* INDR */
 func instrED__INDR(z80 *Z80) {
-	z80.AddTstates(1)
-	var initemp byte = z80.readPort(z80.BC())
-	z80.memory.Write(z80.HL(), initemp)
+	z80.addTstates(1)
+	var initemp byte = z80.pRead(z80.BC())
+	z80.mWrite(z80.HL(), initemp)
 	z80.memptr = z80.BC() - 1
 	z80.B--
 	var initemp2 byte = initemp + z80.C - 1
@@ -5740,7 +5740,7 @@ func instrED__INDR(z80 *Z80) {
 		sz53Table[z80.B]
 	z80.Q = z80.F
 	if z80.B != 0 {
-		z80.AddTstates(5)
+		z80.addTstates(5)
 		z80.DecPC(2)
 	}
 	z80.DecHL()
@@ -5748,11 +5748,11 @@ func instrED__INDR(z80 *Z80) {
 
 /* OTDR */
 func instrED__OTDR(z80 *Z80) {
-	z80.AddTstates(1)
-	var outitemp byte = z80.memory.Read(z80.HL())
+	z80.addTstates(1)
+	var outitemp byte = z80.mRead(z80.HL())
 	z80.B-- /* This does happen first, despite what the specs say */
 	z80.memptr = z80.BC() - 1
-	z80.writePort(z80.BC(), outitemp)
+	z80.pWrite(z80.BC(), outitemp)
 
 	z80.DecHL()
 	var outitemp2 byte = outitemp + z80.L
@@ -5764,7 +5764,7 @@ func instrED__OTDR(z80 *Z80) {
 	z80.Q = z80.F
 
 	if z80.B != 0 {
-		z80.AddTstates(5)
+		z80.addTstates(5)
 		z80.DecPC(2)
 	}
 }
@@ -5777,21 +5777,21 @@ func instrED__SLTTRAP(z80 *Z80) {
 
 /* ADD ix,BC */
 func instrDD__ADD_REG_BC(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.add16(z80.ix, z80.BC())
 }
 
 /* ADD ix,DE */
 func instrDD__ADD_REG_DE(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.add16(z80.ix, z80.DE())
 }
 
 /* LD ix,nnnn */
 func instrDD__LD_REG_NNNN(z80 *Z80) {
-	b1 := z80.memory.Read(z80.PC())
+	b1 := z80.mRead(z80.PC())
 	z80.IncPC(1)
-	b2 := z80.memory.Read(z80.PC())
+	b2 := z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.SetIX(joinBytes(b2, b1))
 	z80.Q = 0
@@ -5805,7 +5805,7 @@ func instrDD__LD_iNNNN_REG(z80 *Z80) {
 
 /* INC ix */
 func instrDD__INC_REG(z80 *Z80) {
-	z80.AddTstates(2)
+	z80.addTstates(2)
 	z80.IncIX()
 	z80.Q = 0
 }
@@ -5827,14 +5827,14 @@ func instrDD__DEC_REGH(z80 *Z80) {
 
 /* LD IXH,nn */
 func instrDD__LD_REGH_NN(z80 *Z80) {
-	z80.IXH = z80.memory.Read(z80.PC())
+	z80.IXH = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.Q = 0
 }
 
 /* ADD ix,ix */
 func instrDD__ADD_REG_REG(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.memptr = z80.IX()
 	z80.add16(z80.ix, z80.IX())
 }
@@ -5847,7 +5847,7 @@ func instrDD__LD_REG_iNNNN(z80 *Z80) {
 
 /* DEC ix */
 func instrDD__DEC_REG(z80 *Z80) {
-	z80.AddTstates(2)
+	z80.addTstates(2)
 	z80.DecIX()
 	z80.Q = 0
 }
@@ -5869,51 +5869,51 @@ func instrDD__DEC_REGL(z80 *Z80) {
 
 /* LD IXL,nn */
 func instrDD__LD_REGL_NN(z80 *Z80) {
-	z80.IXL = z80.memory.Read(z80.PC())
+	z80.IXL = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.Q = 0
 }
 
 /* INC (ix+dd) */
 func instrDD__INC_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
 	var wordtemp uint16 = z80.IX() + uint16(signExtend(offset))
-	var bytetemp byte = z80.memory.Read(wordtemp)
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(wordtemp)
+	z80.addTstates(1)
 	z80.inc(&bytetemp)
-	z80.memory.Write(wordtemp, bytetemp)
+	z80.mWrite(wordtemp, bytetemp)
 	z80.Q = 0
 }
 
 /* DEC (ix+dd) */
 func instrDD__DEC_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
 	var wordtemp uint16 = z80.IX() + uint16(signExtend(offset))
-	var bytetemp byte = z80.memory.Read(wordtemp)
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(wordtemp)
+	z80.addTstates(1)
 	z80.dec(&bytetemp)
-	z80.memory.Write(wordtemp, bytetemp)
+	z80.mWrite(wordtemp, bytetemp)
 	z80.Q = 0
 }
 
 /* LD (ix+dd),nn */
 func instrDD__LD_iREGpDD_NN(z80 *Z80) {
-	offset := z80.memory.Read(z80.PC())
+	offset := z80.mRead(z80.PC())
 	z80.IncPC(1)
-	value := z80.memory.Read(z80.PC())
-	z80.AddTstates(2)
+	value := z80.mRead(z80.PC())
+	z80.addTstates(2)
 	z80.IncPC(1)
-	z80.memory.Write(z80.IX()+uint16(signExtend(offset)), value)
+	z80.mWrite(z80.IX()+uint16(signExtend(offset)), value)
 	z80.Q = 0
 }
 
 /* ADD ix,SP */
 func instrDD__ADD_REG_SP(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.add16(z80.ix, z80.SP())
 }
 
@@ -5931,10 +5931,10 @@ func instrDD__LD_B_REGL(z80 *Z80) {
 
 /* LD B,(ix+dd) */
 func instrDD__LD_B_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.B = z80.memory.Read(z80.IX() + uint16(signExtend(offset)))
+	z80.B = z80.mRead(z80.IX() + uint16(signExtend(offset)))
 	z80.Q = 0
 }
 
@@ -5952,10 +5952,10 @@ func instrDD__LD_C_REGL(z80 *Z80) {
 
 /* LD C,(ix+dd) */
 func instrDD__LD_C_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.C = z80.memory.Read(z80.IX() + uint16(signExtend(offset)))
+	z80.C = z80.mRead(z80.IX() + uint16(signExtend(offset)))
 	z80.Q = 0
 }
 
@@ -5973,10 +5973,10 @@ func instrDD__LD_D_REGL(z80 *Z80) {
 
 /* LD D,(ix+dd) */
 func instrDD__LD_D_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.D = z80.memory.Read(z80.IX() + uint16(signExtend(offset)))
+	z80.D = z80.mRead(z80.IX() + uint16(signExtend(offset)))
 	z80.Q = 0
 }
 
@@ -5994,10 +5994,11 @@ func instrDD__LD_E_REGL(z80 *Z80) {
 
 /* LD E,(ix+dd) */
 func instrDD__LD_E_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.E = z80.memory.Read(z80.IX() + uint16(signExtend(offset)))
+	z80.E = z80.mRead(z80.IX() + uint16(signExtend(offset)))
+	z80.Q = 0
 }
 
 /* LD IXH,B */
@@ -6037,10 +6038,10 @@ func instrDD__LD_REGH_REGL(z80 *Z80) {
 
 /* LD H,(ix+dd) */
 func instrDD__LD_H_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.H = z80.memory.Read(z80.IX() + uint16(signExtend(offset)))
+	z80.H = z80.mRead(z80.IX() + uint16(signExtend(offset)))
 	z80.Q = 0
 }
 
@@ -6087,10 +6088,10 @@ func instrDD__LD_REGL_REGL(z80 *Z80) {
 
 /* LD L,(ix+dd) */
 func instrDD__LD_L_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.L = z80.memory.Read(z80.IX() + uint16(signExtend(offset)))
+	z80.L = z80.mRead(z80.IX() + uint16(signExtend(offset)))
 	z80.Q = 0
 }
 
@@ -6102,64 +6103,64 @@ func instrDD__LD_REGL_A(z80 *Z80) {
 
 /* LD (ix+dd),B */
 func instrDD__LD_iREGpDD_B(z80 *Z80) {
-	offset := z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	offset := z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.memory.Write(z80.IX()+uint16(signExtend(offset)), z80.B)
+	z80.mWrite(z80.IX()+uint16(signExtend(offset)), z80.B)
 	z80.Q = 0
 }
 
 /* LD (ix+dd),C */
 func instrDD__LD_iREGpDD_C(z80 *Z80) {
-	offset := z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	offset := z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.memory.Write(z80.IX()+uint16(signExtend(offset)), z80.C)
+	z80.mWrite(z80.IX()+uint16(signExtend(offset)), z80.C)
 	z80.Q = 0
 }
 
 /* LD (ix+dd),D */
 func instrDD__LD_iREGpDD_D(z80 *Z80) {
-	offset := z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	offset := z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.memory.Write(z80.IX()+uint16(signExtend(offset)), z80.D)
+	z80.mWrite(z80.IX()+uint16(signExtend(offset)), z80.D)
 	z80.Q = 0
 }
 
 /* LD (ix+dd),E */
 func instrDD__LD_iREGpDD_E(z80 *Z80) {
-	offset := z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	offset := z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.memory.Write(z80.IX()+uint16(signExtend(offset)), z80.E)
+	z80.mWrite(z80.IX()+uint16(signExtend(offset)), z80.E)
 	z80.Q = 0
 }
 
 /* LD (ix+dd),H */
 func instrDD__LD_iREGpDD_H(z80 *Z80) {
-	offset := z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	offset := z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.memory.Write(z80.IX()+uint16(signExtend(offset)), z80.H)
+	z80.mWrite(z80.IX()+uint16(signExtend(offset)), z80.H)
 	z80.Q = 0
 }
 
 /* LD (ix+dd),L */
 func instrDD__LD_iREGpDD_L(z80 *Z80) {
-	offset := z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	offset := z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.memory.Write(z80.IX()+uint16(signExtend(offset)), z80.L)
+	z80.mWrite(z80.IX()+uint16(signExtend(offset)), z80.L)
 	z80.Q = 0
 }
 
 /* LD (ix+dd),A */
 func instrDD__LD_iREGpDD_A(z80 *Z80) {
-	offset := z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	offset := z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.memory.Write(z80.IX()+uint16(signExtend(offset)), z80.A)
+	z80.mWrite(z80.IX()+uint16(signExtend(offset)), z80.A)
 	z80.Q = 0
 }
 
@@ -6177,10 +6178,10 @@ func instrDD__LD_A_REGL(z80 *Z80) {
 
 /* LD A,(ix+dd) */
 func instrDD__LD_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.A = z80.memory.Read(z80.IX() + uint16(signExtend(offset)))
+	z80.A = z80.mRead(z80.IX() + uint16(signExtend(offset)))
 	z80.Q = 0
 }
 
@@ -6196,10 +6197,10 @@ func instrDD__ADD_A_REGL(z80 *Z80) {
 
 /* ADD A,(ix+dd) */
 func instrDD__ADD_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	var bytetemp byte = z80.memory.Read(z80.IX() + uint16(signExtend(offset)))
+	var bytetemp byte = z80.mRead(z80.IX() + uint16(signExtend(offset)))
 	z80.add(bytetemp)
 }
 
@@ -6215,10 +6216,10 @@ func instrDD__ADC_A_REGL(z80 *Z80) {
 
 /* ADC A,(ix+dd) */
 func instrDD__ADC_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	var bytetemp byte = z80.memory.Read(z80.IX() + uint16(signExtend(offset)))
+	var bytetemp byte = z80.mRead(z80.IX() + uint16(signExtend(offset)))
 	z80.adc(bytetemp)
 }
 
@@ -6234,10 +6235,10 @@ func instrDD__SUB_A_REGL(z80 *Z80) {
 
 /* SUB A,(ix+dd) */
 func instrDD__SUB_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	var bytetemp byte = z80.memory.Read(z80.IX() + uint16(signExtend(offset)))
+	var bytetemp byte = z80.mRead(z80.IX() + uint16(signExtend(offset)))
 	z80.sub(bytetemp)
 }
 
@@ -6253,10 +6254,10 @@ func instrDD__SBC_A_REGL(z80 *Z80) {
 
 /* SBC A,(ix+dd) */
 func instrDD__SBC_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	var bytetemp byte = z80.memory.Read(z80.IX() + uint16(signExtend(offset)))
+	var bytetemp byte = z80.mRead(z80.IX() + uint16(signExtend(offset)))
 	z80.sbc(bytetemp)
 }
 
@@ -6272,10 +6273,10 @@ func instrDD__AND_A_REGL(z80 *Z80) {
 
 /* AND A,(ix+dd) */
 func instrDD__AND_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	var bytetemp byte = z80.memory.Read(z80.IX() + uint16(signExtend(offset)))
+	var bytetemp byte = z80.mRead(z80.IX() + uint16(signExtend(offset)))
 	z80.and(bytetemp)
 }
 
@@ -6291,10 +6292,10 @@ func instrDD__XOR_A_REGL(z80 *Z80) {
 
 /* XOR A,(ix+dd) */
 func instrDD__XOR_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	var bytetemp byte = z80.memory.Read(z80.IX() + uint16(signExtend(offset)))
+	var bytetemp byte = z80.mRead(z80.IX() + uint16(signExtend(offset)))
 	z80.xor(bytetemp)
 }
 
@@ -6310,10 +6311,10 @@ func instrDD__OR_A_REGL(z80 *Z80) {
 
 /* OR A,(ix+dd) */
 func instrDD__OR_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	var bytetemp byte = z80.memory.Read(z80.IX() + uint16(signExtend(offset)))
+	var bytetemp byte = z80.mRead(z80.IX() + uint16(signExtend(offset)))
 	z80.or(bytetemp)
 }
 
@@ -6329,10 +6330,10 @@ func instrDD__CP_A_REGL(z80 *Z80) {
 
 /* CP A,(ix+dd) */
 func instrDD__CP_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	var bytetemp byte = z80.memory.Read(z80.IX() + uint16(signExtend(offset)))
+	var bytetemp byte = z80.mRead(z80.IX() + uint16(signExtend(offset)))
 	z80.cp(bytetemp)
 }
 
@@ -6349,12 +6350,12 @@ func instrDD__POP_REG(z80 *Z80) {
 
 /* EX (SP),ix */
 func instrDD__EX_iSP_REG(z80 *Z80) {
-	var bytetempl = z80.memory.Read(z80.SP())
-	var bytetemph = z80.memory.Read(z80.SP() + 1)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.SP()+1, z80.IXH)
-	z80.memory.Write(z80.SP(), z80.IXL)
-	z80.AddTstates(2)
+	var bytetempl = z80.mRead(z80.SP())
+	var bytetemph = z80.mRead(z80.SP() + 1)
+	z80.addTstates(1)
+	z80.mWrite(z80.SP()+1, z80.IXH)
+	z80.mWrite(z80.SP(), z80.IXL)
+	z80.addTstates(2)
 	z80.IXL = bytetempl
 	z80.IXH = bytetemph
 	z80.memptr = z80.IX()
@@ -6363,7 +6364,7 @@ func instrDD__EX_iSP_REG(z80 *Z80) {
 
 /* PUSH ix */
 func instrDD__PUSH_REG(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.push16(z80.IXL, z80.IXH)
 	z80.Q = 0
 }
@@ -6376,28 +6377,28 @@ func instrDD__JP_REG(z80 *Z80) {
 
 /* LD SP,ix */
 func instrDD__LD_SP_REG(z80 *Z80) {
-	z80.AddTstates(2)
+	z80.addTstates(2)
 	z80.SetSP(z80.IX())
 	z80.Q = 0
 }
 
 /* ADD iy,BC */
 func instrFD__ADD_REG_BC(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.add16(z80.iy, z80.BC())
 }
 
 /* ADD iy,DE */
 func instrFD__ADD_REG_DE(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.add16(z80.iy, z80.DE())
 }
 
 /* LD iy,nnnn */
 func instrFD__LD_REG_NNNN(z80 *Z80) {
-	b1 := z80.memory.Read(z80.PC())
+	b1 := z80.mRead(z80.PC())
 	z80.IncPC(1)
-	b2 := z80.memory.Read(z80.PC())
+	b2 := z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.SetIY(joinBytes(b2, b1))
 	z80.Q = 0
@@ -6411,7 +6412,7 @@ func instrFD__LD_iNNNN_REG(z80 *Z80) {
 
 /* INC iy */
 func instrFD__INC_REG(z80 *Z80) {
-	z80.AddTstates(2)
+	z80.addTstates(2)
 	z80.IncIY()
 	z80.Q = 0
 }
@@ -6433,14 +6434,14 @@ func instrFD__DEC_REGH(z80 *Z80) {
 
 /* LD IYH,nn */
 func instrFD__LD_REGH_NN(z80 *Z80) {
-	z80.IYH = z80.memory.Read(z80.PC())
+	z80.IYH = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.Q = 0
 }
 
 /* ADD iy,iy */
 func instrFD__ADD_REG_REG(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.memptr = z80.IY()
 	z80.add16(z80.iy, z80.IY())
 }
@@ -6453,7 +6454,7 @@ func instrFD__LD_REG_iNNNN(z80 *Z80) {
 
 /* DEC iy */
 func instrFD__DEC_REG(z80 *Z80) {
-	z80.AddTstates(2)
+	z80.addTstates(2)
 	z80.DecIY()
 	z80.Q = 0
 }
@@ -6475,51 +6476,51 @@ func instrFD__DEC_REGL(z80 *Z80) {
 
 /* LD IYL,nn */
 func instrFD__LD_REGL_NN(z80 *Z80) {
-	z80.IYL = z80.memory.Read(z80.PC())
+	z80.IYL = z80.mRead(z80.PC())
 	z80.IncPC(1)
 	z80.Q = 0
 }
 
 /* INC (iy+dd) */
 func instrFD__INC_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
 	var wordtemp uint16 = z80.IY() + uint16(signExtend(offset))
-	var bytetemp byte = z80.memory.Read(wordtemp)
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(wordtemp)
+	z80.addTstates(1)
 	z80.inc(&bytetemp)
-	z80.memory.Write(wordtemp, bytetemp)
+	z80.mWrite(wordtemp, bytetemp)
 	z80.Q = 0
 }
 
 /* DEC (iy+dd) */
 func instrFD__DEC_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
 	var wordtemp uint16 = z80.IY() + uint16(signExtend(offset))
-	var bytetemp byte = z80.memory.Read(wordtemp)
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(wordtemp)
+	z80.addTstates(1)
 	z80.dec(&bytetemp)
-	z80.memory.Write(wordtemp, bytetemp)
+	z80.mWrite(wordtemp, bytetemp)
 	z80.Q = 0
 }
 
 /* LD (iy+dd),nn */
 func instrFD__LD_iREGpDD_NN(z80 *Z80) {
-	offset := z80.memory.Read(z80.PC())
+	offset := z80.mRead(z80.PC())
 	z80.IncPC(1)
-	value := z80.memory.Read(z80.PC())
-	z80.AddTstates(2)
+	value := z80.mRead(z80.PC())
+	z80.addTstates(2)
 	z80.IncPC(1)
-	z80.memory.Write(z80.IY()+uint16(signExtend(offset)), value)
+	z80.mWrite(z80.IY()+uint16(signExtend(offset)), value)
 	z80.Q = 0
 }
 
 /* ADD iy,SP */
 func instrFD__ADD_REG_SP(z80 *Z80) {
-	z80.AddTstates(7)
+	z80.addTstates(7)
 	z80.add16(z80.iy, z80.SP())
 }
 
@@ -6537,10 +6538,10 @@ func instrFD__LD_B_REGL(z80 *Z80) {
 
 /* LD B,(iy+dd) */
 func instrFD__LD_B_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.B = z80.memory.Read(z80.IY() + uint16(signExtend(offset)))
+	z80.B = z80.mRead(z80.IY() + uint16(signExtend(offset)))
 	z80.Q = 0
 }
 
@@ -6558,10 +6559,10 @@ func instrFD__LD_C_REGL(z80 *Z80) {
 
 /* LD C,(iy+dd) */
 func instrFD__LD_C_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.C = z80.memory.Read(z80.IY() + uint16(signExtend(offset)))
+	z80.C = z80.mRead(z80.IY() + uint16(signExtend(offset)))
 	z80.Q = 0
 }
 
@@ -6579,10 +6580,10 @@ func instrFD__LD_D_REGL(z80 *Z80) {
 
 /* LD D,(iy+dd) */
 func instrFD__LD_D_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.D = z80.memory.Read(z80.IY() + uint16(signExtend(offset)))
+	z80.D = z80.mRead(z80.IY() + uint16(signExtend(offset)))
 	z80.Q = 0
 }
 
@@ -6600,10 +6601,10 @@ func instrFD__LD_E_REGL(z80 *Z80) {
 
 /* LD E,(iy+dd) */
 func instrFD__LD_E_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.E = z80.memory.Read(z80.IY() + uint16(signExtend(offset)))
+	z80.E = z80.mRead(z80.IY() + uint16(signExtend(offset)))
 	z80.Q = 0
 }
 
@@ -6644,10 +6645,10 @@ func instrFD__LD_REGH_REGL(z80 *Z80) {
 
 /* LD H,(iy+dd) */
 func instrFD__LD_H_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.H = z80.memory.Read(z80.IY() + uint16(signExtend(offset)))
+	z80.H = z80.mRead(z80.IY() + uint16(signExtend(offset)))
 	z80.Q = 0
 }
 
@@ -6694,10 +6695,10 @@ func instrFD__LD_REGL_REGL(z80 *Z80) {
 
 /* LD L,(iy+dd) */
 func instrFD__LD_L_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.L = z80.memory.Read(z80.IY() + uint16(signExtend(offset)))
+	z80.L = z80.mRead(z80.IY() + uint16(signExtend(offset)))
 	z80.Q = 0
 }
 
@@ -6709,64 +6710,64 @@ func instrFD__LD_REGL_A(z80 *Z80) {
 
 /* LD (iy+dd),B */
 func instrFD__LD_iREGpDD_B(z80 *Z80) {
-	offset := z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	offset := z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.memory.Write(z80.IY()+uint16(signExtend(offset)), z80.B)
+	z80.mWrite(z80.IY()+uint16(signExtend(offset)), z80.B)
 	z80.Q = 0
 }
 
 /* LD (iy+dd),C */
 func instrFD__LD_iREGpDD_C(z80 *Z80) {
-	offset := z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	offset := z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.memory.Write(z80.IY()+uint16(signExtend(offset)), z80.C)
+	z80.mWrite(z80.IY()+uint16(signExtend(offset)), z80.C)
 	z80.Q = 0
 }
 
 /* LD (iy+dd),D */
 func instrFD__LD_iREGpDD_D(z80 *Z80) {
-	offset := z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	offset := z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.memory.Write(z80.IY()+uint16(signExtend(offset)), z80.D)
+	z80.mWrite(z80.IY()+uint16(signExtend(offset)), z80.D)
 	z80.Q = 0
 }
 
 /* LD (iy+dd),E */
 func instrFD__LD_iREGpDD_E(z80 *Z80) {
-	offset := z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	offset := z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.memory.Write(z80.IY()+uint16(signExtend(offset)), z80.E)
+	z80.mWrite(z80.IY()+uint16(signExtend(offset)), z80.E)
 	z80.Q = 0
 }
 
 /* LD (iy+dd),H */
 func instrFD__LD_iREGpDD_H(z80 *Z80) {
-	offset := z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	offset := z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.memory.Write(z80.IY()+uint16(signExtend(offset)), z80.H)
+	z80.mWrite(z80.IY()+uint16(signExtend(offset)), z80.H)
 	z80.Q = 0
 }
 
 /* LD (iy+dd),L */
 func instrFD__LD_iREGpDD_L(z80 *Z80) {
-	offset := z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	offset := z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.memory.Write(z80.IY()+uint16(signExtend(offset)), z80.L)
+	z80.mWrite(z80.IY()+uint16(signExtend(offset)), z80.L)
 	z80.Q = 0
 }
 
 /* LD (iy+dd),A */
 func instrFD__LD_iREGpDD_A(z80 *Z80) {
-	offset := z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	offset := z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.memory.Write(z80.IY()+uint16(signExtend(offset)), z80.A)
+	z80.mWrite(z80.IY()+uint16(signExtend(offset)), z80.A)
 	z80.Q = 0
 }
 
@@ -6784,10 +6785,10 @@ func instrFD__LD_A_REGL(z80 *Z80) {
 
 /* LD A,(iy+dd) */
 func instrFD__LD_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	z80.A = z80.memory.Read(z80.IY() + uint16(signExtend(offset)))
+	z80.A = z80.mRead(z80.IY() + uint16(signExtend(offset)))
 	z80.Q = 0
 }
 
@@ -6803,10 +6804,10 @@ func instrFD__ADD_A_REGL(z80 *Z80) {
 
 /* ADD A,(iy+dd) */
 func instrFD__ADD_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	var bytetemp byte = z80.memory.Read(z80.IY() + uint16(signExtend(offset)))
+	var bytetemp byte = z80.mRead(z80.IY() + uint16(signExtend(offset)))
 	z80.add(bytetemp)
 }
 
@@ -6822,10 +6823,10 @@ func instrFD__ADC_A_REGL(z80 *Z80) {
 
 /* ADC A,(iy+dd) */
 func instrFD__ADC_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	var bytetemp byte = z80.memory.Read(z80.IY() + uint16(signExtend(offset)))
+	var bytetemp byte = z80.mRead(z80.IY() + uint16(signExtend(offset)))
 	z80.adc(bytetemp)
 }
 
@@ -6841,10 +6842,10 @@ func instrFD__SUB_A_REGL(z80 *Z80) {
 
 /* SUB A,(iy+dd) */
 func instrFD__SUB_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	var bytetemp byte = z80.memory.Read(z80.IY() + uint16(signExtend(offset)))
+	var bytetemp byte = z80.mRead(z80.IY() + uint16(signExtend(offset)))
 	z80.sub(bytetemp)
 }
 
@@ -6860,10 +6861,10 @@ func instrFD__SBC_A_REGL(z80 *Z80) {
 
 /* SBC A,(iy+dd) */
 func instrFD__SBC_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	var bytetemp byte = z80.memory.Read(z80.IY() + uint16(signExtend(offset)))
+	var bytetemp byte = z80.mRead(z80.IY() + uint16(signExtend(offset)))
 	z80.sbc(bytetemp)
 }
 
@@ -6879,10 +6880,10 @@ func instrFD__AND_A_REGL(z80 *Z80) {
 
 /* AND A,(iy+dd) */
 func instrFD__AND_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	var bytetemp byte = z80.memory.Read(z80.IY() + uint16(signExtend(offset)))
+	var bytetemp byte = z80.mRead(z80.IY() + uint16(signExtend(offset)))
 	z80.and(bytetemp)
 }
 
@@ -6898,10 +6899,10 @@ func instrFD__XOR_A_REGL(z80 *Z80) {
 
 /* XOR A,(iy+dd) */
 func instrFD__XOR_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	var bytetemp byte = z80.memory.Read(z80.IY() + uint16(signExtend(offset)))
+	var bytetemp byte = z80.mRead(z80.IY() + uint16(signExtend(offset)))
 	z80.xor(bytetemp)
 }
 
@@ -6917,10 +6918,10 @@ func instrFD__OR_A_REGL(z80 *Z80) {
 
 /* OR A,(iy+dd) */
 func instrFD__OR_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	var bytetemp byte = z80.memory.Read(z80.IY() + uint16(signExtend(offset)))
+	var bytetemp byte = z80.mRead(z80.IY() + uint16(signExtend(offset)))
 	z80.or(bytetemp)
 }
 
@@ -6936,10 +6937,10 @@ func instrFD__CP_A_REGL(z80 *Z80) {
 
 /* CP A,(iy+dd) */
 func instrFD__CP_A_iREGpDD(z80 *Z80) {
-	var offset byte = z80.memory.Read(z80.PC())
-	z80.AddTstates(5)
+	var offset byte = z80.mRead(z80.PC())
+	z80.addTstates(5)
 	z80.IncPC(1)
-	var bytetemp byte = z80.memory.Read(z80.IY() + uint16(signExtend(offset)))
+	var bytetemp byte = z80.mRead(z80.IY() + uint16(signExtend(offset)))
 	z80.cp(bytetemp)
 }
 
@@ -6956,12 +6957,12 @@ func instrFD__POP_REG(z80 *Z80) {
 
 /* EX (SP),iy */
 func instrFD__EX_iSP_REG(z80 *Z80) {
-	var bytetempl = z80.memory.Read(z80.SP())
-	var bytetemph = z80.memory.Read(z80.SP() + 1)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.SP()+1, z80.IYH)
-	z80.memory.Write(z80.SP(), z80.IYL)
-	z80.AddTstates(2)
+	var bytetempl = z80.mRead(z80.SP())
+	var bytetemph = z80.mRead(z80.SP() + 1)
+	z80.addTstates(1)
+	z80.mWrite(z80.SP()+1, z80.IYH)
+	z80.mWrite(z80.SP(), z80.IYL)
+	z80.addTstates(2)
 	z80.IYL = bytetempl
 	z80.IYH = bytetemph
 	z80.memptr = z80.IY()
@@ -6970,7 +6971,7 @@ func instrFD__EX_iSP_REG(z80 *Z80) {
 
 /* PUSH iy */
 func instrFD__PUSH_REG(z80 *Z80) {
-	z80.AddTstates(1)
+	z80.addTstates(1)
 	z80.push16(z80.IYL, z80.IYH)
 	z80.Q = 0
 }
@@ -6983,1600 +6984,1600 @@ func instrFD__JP_REG(z80 *Z80) {
 
 /* LD SP,iy */
 func instrFD__LD_SP_REG(z80 *Z80) {
-	z80.AddTstates(2)
+	z80.addTstates(2)
 	z80.SetSP(z80.IY())
 	z80.Q = 0
 }
 
 /* LD B,RLC (REGISTER+dd) */
 func instrDDCB__LD_B_RLC_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.B = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.B = z80.rlc(z80.B)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.mWrite(z80.tempaddr, z80.B)
 }
 
 /* LD C,RLC (REGISTER+dd) */
 func instrDDCB__LD_C_RLC_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.C = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.C = z80.rlc(z80.C)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.mWrite(z80.tempaddr, z80.C)
 }
 
 /* LD D,RLC (REGISTER+dd) */
 func instrDDCB__LD_D_RLC_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.D = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.D = z80.rlc(z80.D)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.mWrite(z80.tempaddr, z80.D)
 }
 
 /* LD E,RLC (REGISTER+dd) */
 func instrDDCB__LD_E_RLC_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.E = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.E = z80.rlc(z80.E)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.mWrite(z80.tempaddr, z80.E)
 }
 
 /* LD H,RLC (REGISTER+dd) */
 func instrDDCB__LD_H_RLC_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.H = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.H = z80.rlc(z80.H)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.mWrite(z80.tempaddr, z80.H)
 }
 
 /* LD L,RLC (REGISTER+dd) */
 func instrDDCB__LD_L_RLC_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.L = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.L = z80.rlc(z80.L)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.mWrite(z80.tempaddr, z80.L)
 }
 
 /* RLC (REGISTER+dd) */
 func instrDDCB__RLC_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	bytetemp = z80.rlc(bytetemp)
-	z80.memory.Write(z80.tempaddr, bytetemp)
+	z80.mWrite(z80.tempaddr, bytetemp)
 
 }
 
 /* LD A,RLC (REGISTER+dd) */
 func instrDDCB__LD_A_RLC_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.A = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.A = z80.rlc(z80.A)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.mWrite(z80.tempaddr, z80.A)
 }
 
 /* LD B,RRC (REGISTER+dd) */
 func instrDDCB__LD_B_RRC_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.B = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.B = z80.rrc(z80.B)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.mWrite(z80.tempaddr, z80.B)
 }
 
 /* LD C,RRC (REGISTER+dd) */
 func instrDDCB__LD_C_RRC_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.C = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.C = z80.rrc(z80.C)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.mWrite(z80.tempaddr, z80.C)
 }
 
 /* LD D,RRC (REGISTER+dd) */
 func instrDDCB__LD_D_RRC_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.D = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.D = z80.rrc(z80.D)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.mWrite(z80.tempaddr, z80.D)
 }
 
 /* LD E,RRC (REGISTER+dd) */
 func instrDDCB__LD_E_RRC_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.E = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.E = z80.rrc(z80.E)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.mWrite(z80.tempaddr, z80.E)
 }
 
 /* LD H,RRC (REGISTER+dd) */
 func instrDDCB__LD_H_RRC_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.H = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.H = z80.rrc(z80.H)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.mWrite(z80.tempaddr, z80.H)
 }
 
 /* LD L,RRC (REGISTER+dd) */
 func instrDDCB__LD_L_RRC_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.L = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.L = z80.rrc(z80.L)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.mWrite(z80.tempaddr, z80.L)
 }
 
 /* RRC (REGISTER+dd) */
 func instrDDCB__RRC_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	bytetemp = z80.rrc(bytetemp)
-	z80.memory.Write(z80.tempaddr, bytetemp)
+	z80.mWrite(z80.tempaddr, bytetemp)
 }
 
 /* LD A,RRC (REGISTER+dd) */
 func instrDDCB__LD_A_RRC_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.A = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.A = z80.rrc(z80.A)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.mWrite(z80.tempaddr, z80.A)
 }
 
 /* LD B,RL (REGISTER+dd) */
 func instrDDCB__LD_B_RL_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.B = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.B = z80.rl(z80.B)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.mWrite(z80.tempaddr, z80.B)
 }
 
 /* LD C,RL (REGISTER+dd) */
 func instrDDCB__LD_C_RL_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.C = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.C = z80.rl(z80.C)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.mWrite(z80.tempaddr, z80.C)
 }
 
 /* LD D,RL (REGISTER+dd) */
 func instrDDCB__LD_D_RL_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.D = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.D = z80.rl(z80.D)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.mWrite(z80.tempaddr, z80.D)
 }
 
 /* LD E,RL (REGISTER+dd) */
 func instrDDCB__LD_E_RL_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.E = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.E = z80.rl(z80.E)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.mWrite(z80.tempaddr, z80.E)
 }
 
 /* LD H,RL (REGISTER+dd) */
 func instrDDCB__LD_H_RL_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.H = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.H = z80.rl(z80.H)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.mWrite(z80.tempaddr, z80.H)
 }
 
 /* LD L,RL (REGISTER+dd) */
 func instrDDCB__LD_L_RL_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.L = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.L = z80.rl(z80.L)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.mWrite(z80.tempaddr, z80.L)
 }
 
 /* RL (REGISTER+dd) */
 func instrDDCB__RL_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	bytetemp = z80.rl(bytetemp)
-	z80.memory.Write(z80.tempaddr, bytetemp)
+	z80.mWrite(z80.tempaddr, bytetemp)
 }
 
 /* LD A,RL (REGISTER+dd) */
 func instrDDCB__LD_A_RL_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.A = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.A = z80.rl(z80.A)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.mWrite(z80.tempaddr, z80.A)
 }
 
 /* LD B,RR (REGISTER+dd) */
 func instrDDCB__LD_B_RR_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.B = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.B = z80.rr(z80.B)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.mWrite(z80.tempaddr, z80.B)
 }
 
 /* LD C,RR (REGISTER+dd) */
 func instrDDCB__LD_C_RR_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.C = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.C = z80.rr(z80.C)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.mWrite(z80.tempaddr, z80.C)
 }
 
 /* LD D,RR (REGISTER+dd) */
 func instrDDCB__LD_D_RR_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.D = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.D = z80.rr(z80.D)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.mWrite(z80.tempaddr, z80.D)
 }
 
 /* LD E,RR (REGISTER+dd) */
 func instrDDCB__LD_E_RR_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.E = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.E = z80.rr(z80.E)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.mWrite(z80.tempaddr, z80.E)
 }
 
 /* LD H,RR (REGISTER+dd) */
 func instrDDCB__LD_H_RR_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.H = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.H = z80.rr(z80.H)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.mWrite(z80.tempaddr, z80.H)
 }
 
 /* LD L,RR (REGISTER+dd) */
 func instrDDCB__LD_L_RR_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.L = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.L = z80.rr(z80.L)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.mWrite(z80.tempaddr, z80.L)
 }
 
 /* RR (REGISTER+dd) */
 func instrDDCB__RR_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	bytetemp = z80.rr(bytetemp)
-	z80.memory.Write(z80.tempaddr, bytetemp)
+	z80.mWrite(z80.tempaddr, bytetemp)
 }
 
 /* LD A,RR (REGISTER+dd) */
 func instrDDCB__LD_A_RR_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.A = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.A = z80.rr(z80.A)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.mWrite(z80.tempaddr, z80.A)
 }
 
 /* LD B,SLA (REGISTER+dd) */
 func instrDDCB__LD_B_SLA_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.B = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.B = z80.sla(z80.B)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.mWrite(z80.tempaddr, z80.B)
 }
 
 /* LD C,SLA (REGISTER+dd) */
 func instrDDCB__LD_C_SLA_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.C = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.C = z80.sla(z80.C)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.mWrite(z80.tempaddr, z80.C)
 }
 
 /* LD D,SLA (REGISTER+dd) */
 func instrDDCB__LD_D_SLA_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.D = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.D = z80.sla(z80.D)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.mWrite(z80.tempaddr, z80.D)
 }
 
 /* LD E,SLA (REGISTER+dd) */
 func instrDDCB__LD_E_SLA_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.E = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.E = z80.sla(z80.E)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.mWrite(z80.tempaddr, z80.E)
 }
 
 /* LD H,SLA (REGISTER+dd) */
 func instrDDCB__LD_H_SLA_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.H = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.H = z80.sla(z80.H)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.mWrite(z80.tempaddr, z80.H)
 }
 
 /* LD L,SLA (REGISTER+dd) */
 func instrDDCB__LD_L_SLA_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.L = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.L = z80.sla(z80.L)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.mWrite(z80.tempaddr, z80.L)
 }
 
 /* SLA (REGISTER+dd) */
 func instrDDCB__SLA_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	bytetemp = z80.sla(bytetemp)
-	z80.memory.Write(z80.tempaddr, bytetemp)
+	z80.mWrite(z80.tempaddr, bytetemp)
 }
 
 /* LD A,SLA (REGISTER+dd) */
 func instrDDCB__LD_A_SLA_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.A = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.A = z80.sla(z80.A)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.mWrite(z80.tempaddr, z80.A)
 }
 
 /* LD B,SRA (REGISTER+dd) */
 func instrDDCB__LD_B_SRA_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.B = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.B = z80.sra(z80.B)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.mWrite(z80.tempaddr, z80.B)
 }
 
 /* LD C,SRA (REGISTER+dd) */
 func instrDDCB__LD_C_SRA_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.C = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.C = z80.sra(z80.C)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.mWrite(z80.tempaddr, z80.C)
 }
 
 /* LD D,SRA (REGISTER+dd) */
 func instrDDCB__LD_D_SRA_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.D = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.D = z80.sra(z80.D)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.mWrite(z80.tempaddr, z80.D)
 }
 
 /* LD E,SRA (REGISTER+dd) */
 func instrDDCB__LD_E_SRA_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.E = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.E = z80.sra(z80.E)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.mWrite(z80.tempaddr, z80.E)
 }
 
 /* LD H,SRA (REGISTER+dd) */
 func instrDDCB__LD_H_SRA_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.H = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.H = z80.sra(z80.H)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.mWrite(z80.tempaddr, z80.H)
 }
 
 /* LD L,SRA (REGISTER+dd) */
 func instrDDCB__LD_L_SRA_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.L = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.L = z80.sra(z80.L)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.mWrite(z80.tempaddr, z80.L)
 }
 
 /* SRA (REGISTER+dd) */
 func instrDDCB__SRA_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	bytetemp = z80.sra(bytetemp)
-	z80.memory.Write(z80.tempaddr, bytetemp)
+	z80.mWrite(z80.tempaddr, bytetemp)
 }
 
 /* LD A,SRA (REGISTER+dd) */
 func instrDDCB__LD_A_SRA_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.A = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.A = z80.sra(z80.A)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.mWrite(z80.tempaddr, z80.A)
 }
 
 /* LD B,SLL (REGISTER+dd) */
 func instrDDCB__LD_B_SLL_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.B = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.B = z80.sll(z80.B)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.mWrite(z80.tempaddr, z80.B)
 }
 
 /* LD C,SLL (REGISTER+dd) */
 func instrDDCB__LD_C_SLL_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.C = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.C = z80.sll(z80.C)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.mWrite(z80.tempaddr, z80.C)
 }
 
 /* LD D,SLL (REGISTER+dd) */
 func instrDDCB__LD_D_SLL_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.D = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.D = z80.sll(z80.D)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.mWrite(z80.tempaddr, z80.D)
 }
 
 /* LD E,SLL (REGISTER+dd) */
 func instrDDCB__LD_E_SLL_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.E = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.E = z80.sll(z80.E)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.mWrite(z80.tempaddr, z80.E)
 }
 
 /* LD H,SLL (REGISTER+dd) */
 func instrDDCB__LD_H_SLL_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.H = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.H = z80.sll(z80.H)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.mWrite(z80.tempaddr, z80.H)
 }
 
 /* LD L,SLL (REGISTER+dd) */
 func instrDDCB__LD_L_SLL_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.L = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.L = z80.sll(z80.L)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.mWrite(z80.tempaddr, z80.L)
 }
 
 /* SLL (REGISTER+dd) */
 func instrDDCB__SLL_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	bytetemp = z80.sll(bytetemp)
-	z80.memory.Write(z80.tempaddr, bytetemp)
+	z80.mWrite(z80.tempaddr, bytetemp)
 }
 
 /* LD A,SLL (REGISTER+dd) */
 func instrDDCB__LD_A_SLL_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.A = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.A = z80.sll(z80.A)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.mWrite(z80.tempaddr, z80.A)
 }
 
 /* LD B,SRL (REGISTER+dd) */
 func instrDDCB__LD_B_SRL_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.B = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.B = z80.srl(z80.B)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.mWrite(z80.tempaddr, z80.B)
 }
 
 /* LD C,SRL (REGISTER+dd) */
 func instrDDCB__LD_C_SRL_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.C = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.C = z80.srl(z80.C)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.mWrite(z80.tempaddr, z80.C)
 }
 
 /* LD D,SRL (REGISTER+dd) */
 func instrDDCB__LD_D_SRL_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.D = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.D = z80.srl(z80.D)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.mWrite(z80.tempaddr, z80.D)
 }
 
 /* LD E,SRL (REGISTER+dd) */
 func instrDDCB__LD_E_SRL_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.E = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.E = z80.srl(z80.E)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.mWrite(z80.tempaddr, z80.E)
 }
 
 /* LD H,SRL (REGISTER+dd) */
 func instrDDCB__LD_H_SRL_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.H = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.H = z80.srl(z80.H)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.mWrite(z80.tempaddr, z80.H)
 }
 
 /* LD L,SRL (REGISTER+dd) */
 func instrDDCB__LD_L_SRL_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.L = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.L = z80.srl(z80.L)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.mWrite(z80.tempaddr, z80.L)
 }
 
 /* SRL (REGISTER+dd) */
 func instrDDCB__SRL_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	bytetemp = z80.srl(bytetemp)
-	z80.memory.Write(z80.tempaddr, bytetemp)
+	z80.mWrite(z80.tempaddr, bytetemp)
 }
 
 /* LD A,SRL (REGISTER+dd) */
 func instrDDCB__LD_A_SRL_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	z80.A = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.A = z80.srl(z80.A)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.mWrite(z80.tempaddr, z80.A)
 }
 
 /* BIT 0,(REGISTER+dd) */
 func instrDDCB__BIT_0_iREGpDD(z80 *Z80) {
-	bytetemp := z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	bytetemp := z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.biti(0, bytetemp, z80.tempaddr)
 }
 
 /* BIT 1,(REGISTER+dd) */
 func instrDDCB__BIT_1_iREGpDD(z80 *Z80) {
-	bytetemp := z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	bytetemp := z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.biti(1, bytetemp, z80.tempaddr)
 }
 
 /* BIT 2,(REGISTER+dd) */
 func instrDDCB__BIT_2_iREGpDD(z80 *Z80) {
-	bytetemp := z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	bytetemp := z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.biti(2, bytetemp, z80.tempaddr)
 }
 
 /* BIT 3,(REGISTER+dd) */
 func instrDDCB__BIT_3_iREGpDD(z80 *Z80) {
-	bytetemp := z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	bytetemp := z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.biti(3, bytetemp, z80.tempaddr)
 }
 
 /* BIT 4,(REGISTER+dd) */
 func instrDDCB__BIT_4_iREGpDD(z80 *Z80) {
-	bytetemp := z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	bytetemp := z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.biti(4, bytetemp, z80.tempaddr)
 }
 
 /* BIT 5,(REGISTER+dd) */
 func instrDDCB__BIT_5_iREGpDD(z80 *Z80) {
-	bytetemp := z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	bytetemp := z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.biti(5, bytetemp, z80.tempaddr)
 }
 
 /* BIT 6,(REGISTER+dd) */
 func instrDDCB__BIT_6_iREGpDD(z80 *Z80) {
-	bytetemp := z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	bytetemp := z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.biti(6, bytetemp, z80.tempaddr)
 }
 
 /* BIT 7,(REGISTER+dd) */
 func instrDDCB__BIT_7_iREGpDD(z80 *Z80) {
-	bytetemp := z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
+	bytetemp := z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
 	z80.biti(7, bytetemp, z80.tempaddr)
 }
 
 /* LD B,RES 0,(REGISTER+dd) */
 func instrDDCB__LD_B_RES_0_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr) & 0xfe
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.B = z80.mRead(z80.tempaddr) & 0xfe
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.B)
 	z80.Q = 0
 }
 
 /* LD C,RES 0,(REGISTER+dd) */
 func instrDDCB__LD_C_RES_0_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr) & 0xfe
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.C = z80.mRead(z80.tempaddr) & 0xfe
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.C)
 	z80.Q = 0
 }
 
 /* LD D,RES 0,(REGISTER+dd) */
 func instrDDCB__LD_D_RES_0_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr) & 0xfe
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.D = z80.mRead(z80.tempaddr) & 0xfe
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.D)
 	z80.Q = 0
 }
 
 /* LD E,RES 0,(REGISTER+dd) */
 func instrDDCB__LD_E_RES_0_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr) & 0xfe
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.E = z80.mRead(z80.tempaddr) & 0xfe
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.E)
 	z80.Q = 0
 }
 
 /* LD H,RES 0,(REGISTER+dd) */
 func instrDDCB__LD_H_RES_0_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr) & 0xfe
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.H = z80.mRead(z80.tempaddr) & 0xfe
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.H)
 	z80.Q = 0
 }
 
 /* LD L,RES 0,(REGISTER+dd) */
 func instrDDCB__LD_L_RES_0_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr) & 0xfe
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.L = z80.mRead(z80.tempaddr) & 0xfe
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.L)
 	z80.Q = 0
 }
 
 /* RES 0,(REGISTER+dd) */
 func instrDDCB__RES_0_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, bytetemp&0xfe)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, bytetemp&0xfe)
 	z80.Q = 0
 }
 
 /* LD A,RES 0,(REGISTER+dd) */
 func instrDDCB__LD_A_RES_0_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr) & 0xfe
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.A = z80.mRead(z80.tempaddr) & 0xfe
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.A)
 	z80.Q = 0
 }
 
 /* LD B,RES 1,(REGISTER+dd) */
 func instrDDCB__LD_B_RES_1_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr) & 0xfd
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.B = z80.mRead(z80.tempaddr) & 0xfd
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.B)
 	z80.Q = 0
 }
 
 /* LD C,RES 1,(REGISTER+dd) */
 func instrDDCB__LD_C_RES_1_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr) & 0xfd
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.C = z80.mRead(z80.tempaddr) & 0xfd
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.C)
 	z80.Q = 0
 }
 
 /* LD D,RES 1,(REGISTER+dd) */
 func instrDDCB__LD_D_RES_1_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr) & 0xfd
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.D = z80.mRead(z80.tempaddr) & 0xfd
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.D)
 	z80.Q = 0
 }
 
 /* LD E,RES 1,(REGISTER+dd) */
 func instrDDCB__LD_E_RES_1_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr) & 0xfd
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.E = z80.mRead(z80.tempaddr) & 0xfd
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.E)
 	z80.Q = 0
 }
 
 /* LD H,RES 1,(REGISTER+dd) */
 func instrDDCB__LD_H_RES_1_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr) & 0xfd
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.H = z80.mRead(z80.tempaddr) & 0xfd
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.H)
 	z80.Q = 0
 }
 
 /* LD L,RES 1,(REGISTER+dd) */
 func instrDDCB__LD_L_RES_1_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr) & 0xfd
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.L = z80.mRead(z80.tempaddr) & 0xfd
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.L)
 	z80.Q = 0
 }
 
 /* RES 1,(REGISTER+dd) */
 func instrDDCB__RES_1_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, bytetemp&0xfd)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, bytetemp&0xfd)
 	z80.Q = 0
 }
 
 /* LD A,RES 1,(REGISTER+dd) */
 func instrDDCB__LD_A_RES_1_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr) & 0xfd
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.A = z80.mRead(z80.tempaddr) & 0xfd
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.A)
 	z80.Q = 0
 }
 
 /* LD B,RES 2,(REGISTER+dd) */
 func instrDDCB__LD_B_RES_2_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr) & 0xfb
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.B = z80.mRead(z80.tempaddr) & 0xfb
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.B)
 	z80.Q = 0
 }
 
 /* LD C,RES 2,(REGISTER+dd) */
 func instrDDCB__LD_C_RES_2_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr) & 0xfb
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.C = z80.mRead(z80.tempaddr) & 0xfb
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.C)
 	z80.Q = 0
 }
 
 /* LD D,RES 2,(REGISTER+dd) */
 func instrDDCB__LD_D_RES_2_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr) & 0xfb
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.D = z80.mRead(z80.tempaddr) & 0xfb
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.D)
 	z80.Q = 0
 }
 
 /* LD E,RES 2,(REGISTER+dd) */
 func instrDDCB__LD_E_RES_2_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr) & 0xfb
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.E = z80.mRead(z80.tempaddr) & 0xfb
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.E)
 	z80.Q = 0
 }
 
 /* LD H,RES 2,(REGISTER+dd) */
 func instrDDCB__LD_H_RES_2_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr) & 0xfb
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.H = z80.mRead(z80.tempaddr) & 0xfb
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.H)
 	z80.Q = 0
 }
 
 /* LD L,RES 2,(REGISTER+dd) */
 func instrDDCB__LD_L_RES_2_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr) & 0xfb
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.L = z80.mRead(z80.tempaddr) & 0xfb
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.L)
 	z80.Q = 0
 }
 
 /* RES 2,(REGISTER+dd) */
 func instrDDCB__RES_2_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, bytetemp&0xfb)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, bytetemp&0xfb)
 	z80.Q = 0
 }
 
 /* LD A,RES 2,(REGISTER+dd) */
 func instrDDCB__LD_A_RES_2_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr) & 0xfb
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.A = z80.mRead(z80.tempaddr) & 0xfb
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.A)
 	z80.Q = 0
 }
 
 /* LD B,RES 3,(REGISTER+dd) */
 func instrDDCB__LD_B_RES_3_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr) & 0xf7
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.B = z80.mRead(z80.tempaddr) & 0xf7
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.B)
 	z80.Q = 0
 }
 
 /* LD C,RES 3,(REGISTER+dd) */
 func instrDDCB__LD_C_RES_3_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr) & 0xf7
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.C = z80.mRead(z80.tempaddr) & 0xf7
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.C)
 	z80.Q = 0
 }
 
 /* LD D,RES 3,(REGISTER+dd) */
 func instrDDCB__LD_D_RES_3_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr) & 0xf7
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.D = z80.mRead(z80.tempaddr) & 0xf7
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.D)
 	z80.Q = 0
 }
 
 /* LD E,RES 3,(REGISTER+dd) */
 func instrDDCB__LD_E_RES_3_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr) & 0xf7
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.E = z80.mRead(z80.tempaddr) & 0xf7
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.E)
 	z80.Q = 0
 }
 
 /* LD H,RES 3,(REGISTER+dd) */
 func instrDDCB__LD_H_RES_3_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr) & 0xf7
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.H = z80.mRead(z80.tempaddr) & 0xf7
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.H)
 	z80.Q = 0
 }
 
 /* LD L,RES 3,(REGISTER+dd) */
 func instrDDCB__LD_L_RES_3_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr) & 0xf7
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.L = z80.mRead(z80.tempaddr) & 0xf7
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.L)
 	z80.Q = 0
 }
 
 /* RES 3,(REGISTER+dd) */
 func instrDDCB__RES_3_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, bytetemp&0xf7)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, bytetemp&0xf7)
 	z80.Q = 0
 }
 
 /* LD A,RES 3,(REGISTER+dd) */
 func instrDDCB__LD_A_RES_3_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr) & 0xf7
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.A = z80.mRead(z80.tempaddr) & 0xf7
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.A)
 	z80.Q = 0
 }
 
 /* LD B,RES 4,(REGISTER+dd) */
 func instrDDCB__LD_B_RES_4_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr) & 0xef
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.B = z80.mRead(z80.tempaddr) & 0xef
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.B)
 	z80.Q = 0
 }
 
 /* LD C,RES 4,(REGISTER+dd) */
 func instrDDCB__LD_C_RES_4_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr) & 0xef
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.C = z80.mRead(z80.tempaddr) & 0xef
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.C)
 	z80.Q = 0
 }
 
 /* LD D,RES 4,(REGISTER+dd) */
 func instrDDCB__LD_D_RES_4_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr) & 0xef
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.D = z80.mRead(z80.tempaddr) & 0xef
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.D)
 	z80.Q = 0
 }
 
 /* LD E,RES 4,(REGISTER+dd) */
 func instrDDCB__LD_E_RES_4_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr) & 0xef
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.E = z80.mRead(z80.tempaddr) & 0xef
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.E)
 	z80.Q = 0
 }
 
 /* LD H,RES 4,(REGISTER+dd) */
 func instrDDCB__LD_H_RES_4_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr) & 0xef
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.H = z80.mRead(z80.tempaddr) & 0xef
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.H)
 	z80.Q = 0
 }
 
 /* LD L,RES 4,(REGISTER+dd) */
 func instrDDCB__LD_L_RES_4_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr) & 0xef
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.L = z80.mRead(z80.tempaddr) & 0xef
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.L)
 	z80.Q = 0
 }
 
 /* RES 4,(REGISTER+dd) */
 func instrDDCB__RES_4_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, bytetemp&0xef)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, bytetemp&0xef)
 	z80.Q = 0
 }
 
 /* LD A,RES 4,(REGISTER+dd) */
 func instrDDCB__LD_A_RES_4_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr) & 0xef
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.A = z80.mRead(z80.tempaddr) & 0xef
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.A)
 	z80.Q = 0
 }
 
 /* LD B,RES 5,(REGISTER+dd) */
 func instrDDCB__LD_B_RES_5_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr) & 0xdf
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.B = z80.mRead(z80.tempaddr) & 0xdf
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.B)
 	z80.Q = 0
 }
 
 /* LD C,RES 5,(REGISTER+dd) */
 func instrDDCB__LD_C_RES_5_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr) & 0xdf
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.C = z80.mRead(z80.tempaddr) & 0xdf
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.C)
 	z80.Q = 0
 }
 
 /* LD D,RES 5,(REGISTER+dd) */
 func instrDDCB__LD_D_RES_5_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr) & 0xdf
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.D = z80.mRead(z80.tempaddr) & 0xdf
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.D)
 	z80.Q = 0
 }
 
 /* LD E,RES 5,(REGISTER+dd) */
 func instrDDCB__LD_E_RES_5_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr) & 0xdf
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.E = z80.mRead(z80.tempaddr) & 0xdf
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.E)
 	z80.Q = 0
 }
 
 /* LD H,RES 5,(REGISTER+dd) */
 func instrDDCB__LD_H_RES_5_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr) & 0xdf
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.H = z80.mRead(z80.tempaddr) & 0xdf
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.H)
 	z80.Q = 0
 }
 
 /* LD L,RES 5,(REGISTER+dd) */
 func instrDDCB__LD_L_RES_5_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr) & 0xdf
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.L = z80.mRead(z80.tempaddr) & 0xdf
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.L)
 	z80.Q = 0
 }
 
 /* RES 5,(REGISTER+dd) */
 func instrDDCB__RES_5_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, bytetemp&0xdf)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, bytetemp&0xdf)
 	z80.Q = 0
 }
 
 /* LD A,RES 5,(REGISTER+dd) */
 func instrDDCB__LD_A_RES_5_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr) & 0xdf
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.A = z80.mRead(z80.tempaddr) & 0xdf
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.A)
 	z80.Q = 0
 }
 
 /* LD B,RES 6,(REGISTER+dd) */
 func instrDDCB__LD_B_RES_6_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr) & 0xbf
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.B = z80.mRead(z80.tempaddr) & 0xbf
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.B)
 	z80.Q = 0
 }
 
 /* LD C,RES 6,(REGISTER+dd) */
 func instrDDCB__LD_C_RES_6_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr) & 0xbf
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.C = z80.mRead(z80.tempaddr) & 0xbf
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.C)
 	z80.Q = 0
 }
 
 /* LD D,RES 6,(REGISTER+dd) */
 func instrDDCB__LD_D_RES_6_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr) & 0xbf
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.D = z80.mRead(z80.tempaddr) & 0xbf
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.D)
 	z80.Q = 0
 }
 
 /* LD E,RES 6,(REGISTER+dd) */
 func instrDDCB__LD_E_RES_6_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr) & 0xbf
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.E = z80.mRead(z80.tempaddr) & 0xbf
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.E)
 	z80.Q = 0
 }
 
 /* LD H,RES 6,(REGISTER+dd) */
 func instrDDCB__LD_H_RES_6_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr) & 0xbf
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.H = z80.mRead(z80.tempaddr) & 0xbf
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.H)
 	z80.Q = 0
 }
 
 /* LD L,RES 6,(REGISTER+dd) */
 func instrDDCB__LD_L_RES_6_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr) & 0xbf
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.L = z80.mRead(z80.tempaddr) & 0xbf
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.L)
 	z80.Q = 0
 }
 
 /* RES 6,(REGISTER+dd) */
 func instrDDCB__RES_6_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, bytetemp&0xbf)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, bytetemp&0xbf)
 	z80.Q = 0
 }
 
 /* LD A,RES 6,(REGISTER+dd) */
 func instrDDCB__LD_A_RES_6_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr) & 0xbf
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.A = z80.mRead(z80.tempaddr) & 0xbf
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.A)
 	z80.Q = 0
 }
 
 /* LD B,RES 7,(REGISTER+dd) */
 func instrDDCB__LD_B_RES_7_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr) & 0x7f
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.B = z80.mRead(z80.tempaddr) & 0x7f
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.B)
 	z80.Q = 0
 }
 
 /* LD C,RES 7,(REGISTER+dd) */
 func instrDDCB__LD_C_RES_7_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr) & 0x7f
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.C = z80.mRead(z80.tempaddr) & 0x7f
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.C)
 	z80.Q = 0
 }
 
 /* LD D,RES 7,(REGISTER+dd) */
 func instrDDCB__LD_D_RES_7_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr) & 0x7f
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.D = z80.mRead(z80.tempaddr) & 0x7f
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.D)
 	z80.Q = 0
 }
 
 /* LD E,RES 7,(REGISTER+dd) */
 func instrDDCB__LD_E_RES_7_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr) & 0x7f
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.E = z80.mRead(z80.tempaddr) & 0x7f
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.E)
 	z80.Q = 0
 }
 
 /* LD H,RES 7,(REGISTER+dd) */
 func instrDDCB__LD_H_RES_7_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr) & 0x7f
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.H = z80.mRead(z80.tempaddr) & 0x7f
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.H)
 	z80.Q = 0
 }
 
 /* LD L,RES 7,(REGISTER+dd) */
 func instrDDCB__LD_L_RES_7_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr) & 0x7f
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.L = z80.mRead(z80.tempaddr) & 0x7f
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.L)
 	z80.Q = 0
 }
 
 /* RES 7,(REGISTER+dd) */
 func instrDDCB__RES_7_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, bytetemp&0x7f)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, bytetemp&0x7f)
 	z80.Q = 0
 }
 
 /* LD A,RES 7,(REGISTER+dd) */
 func instrDDCB__LD_A_RES_7_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr) & 0x7f
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.A = z80.mRead(z80.tempaddr) & 0x7f
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.A)
 	z80.Q = 0
 }
 
 /* LD B,SET 0,(REGISTER+dd) */
 func instrDDCB__LD_B_SET_0_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr) | 0x01
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.B = z80.mRead(z80.tempaddr) | 0x01
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.B)
 	z80.Q = 0
 }
 
 /* LD C,SET 0,(REGISTER+dd) */
 func instrDDCB__LD_C_SET_0_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr) | 0x01
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.C = z80.mRead(z80.tempaddr) | 0x01
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.C)
 	z80.Q = 0
 }
 
 /* LD D,SET 0,(REGISTER+dd) */
 func instrDDCB__LD_D_SET_0_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr) | 0x01
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.D = z80.mRead(z80.tempaddr) | 0x01
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.D)
 	z80.Q = 0
 }
 
 /* LD E,SET 0,(REGISTER+dd) */
 func instrDDCB__LD_E_SET_0_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr) | 0x01
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.E = z80.mRead(z80.tempaddr) | 0x01
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.E)
 	z80.Q = 0
 }
 
 /* LD H,SET 0,(REGISTER+dd) */
 func instrDDCB__LD_H_SET_0_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr) | 0x01
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.H = z80.mRead(z80.tempaddr) | 0x01
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.H)
 	z80.Q = 0
 }
 
 /* LD L,SET 0,(REGISTER+dd) */
 func instrDDCB__LD_L_SET_0_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr) | 0x01
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.L = z80.mRead(z80.tempaddr) | 0x01
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.L)
 	z80.Q = 0
 }
 
 /* SET 0,(REGISTER+dd) */
 func instrDDCB__SET_0_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, bytetemp|0x01)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, bytetemp|0x01)
 	z80.Q = 0
 }
 
 /* LD A,SET 0,(REGISTER+dd) */
 func instrDDCB__LD_A_SET_0_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr) | 0x01
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.A = z80.mRead(z80.tempaddr) | 0x01
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.A)
 	z80.Q = 0
 }
 
 /* LD B,SET 1,(REGISTER+dd) */
 func instrDDCB__LD_B_SET_1_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr) | 0x02
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.B = z80.mRead(z80.tempaddr) | 0x02
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.B)
 	z80.Q = 0
 }
 
 /* LD C,SET 1,(REGISTER+dd) */
 func instrDDCB__LD_C_SET_1_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr) | 0x02
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.C = z80.mRead(z80.tempaddr) | 0x02
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.C)
 	z80.Q = 0
 }
 
 /* LD D,SET 1,(REGISTER+dd) */
 func instrDDCB__LD_D_SET_1_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr) | 0x02
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.D = z80.mRead(z80.tempaddr) | 0x02
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.D)
 	z80.Q = 0
 }
 
 /* LD E,SET 1,(REGISTER+dd) */
 func instrDDCB__LD_E_SET_1_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr) | 0x02
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.E = z80.mRead(z80.tempaddr) | 0x02
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.E)
 	z80.Q = 0
 }
 
 /* LD H,SET 1,(REGISTER+dd) */
 func instrDDCB__LD_H_SET_1_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr) | 0x02
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.H = z80.mRead(z80.tempaddr) | 0x02
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.H)
 	z80.Q = 0
 }
 
 /* LD L,SET 1,(REGISTER+dd) */
 func instrDDCB__LD_L_SET_1_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr) | 0x02
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.L = z80.mRead(z80.tempaddr) | 0x02
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.L)
 	z80.Q = 0
 }
 
 /* SET 1,(REGISTER+dd) */
 func instrDDCB__SET_1_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, bytetemp|0x02)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, bytetemp|0x02)
 	z80.Q = 0
 }
 
 /* LD A,SET 1,(REGISTER+dd) */
 func instrDDCB__LD_A_SET_1_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr) | 0x02
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.A = z80.mRead(z80.tempaddr) | 0x02
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.A)
 	z80.Q = 0
 }
 
 /* LD B,SET 2,(REGISTER+dd) */
 func instrDDCB__LD_B_SET_2_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr) | 0x04
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.B = z80.mRead(z80.tempaddr) | 0x04
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.B)
 	z80.Q = 0
 }
 
 /* LD C,SET 2,(REGISTER+dd) */
 func instrDDCB__LD_C_SET_2_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr) | 0x04
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.C = z80.mRead(z80.tempaddr) | 0x04
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.C)
 	z80.Q = 0
 }
 
 /* LD D,SET 2,(REGISTER+dd) */
 func instrDDCB__LD_D_SET_2_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr) | 0x04
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.D = z80.mRead(z80.tempaddr) | 0x04
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.D)
 	z80.Q = 0
 }
 
 /* LD E,SET 2,(REGISTER+dd) */
 func instrDDCB__LD_E_SET_2_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr) | 0x04
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.E = z80.mRead(z80.tempaddr) | 0x04
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.E)
 	z80.Q = 0
 }
 
 /* LD H,SET 2,(REGISTER+dd) */
 func instrDDCB__LD_H_SET_2_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr) | 0x04
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.H = z80.mRead(z80.tempaddr) | 0x04
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.H)
 	z80.Q = 0
 }
 
 /* LD L,SET 2,(REGISTER+dd) */
 func instrDDCB__LD_L_SET_2_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr) | 0x04
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.L = z80.mRead(z80.tempaddr) | 0x04
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.L)
 	z80.Q = 0
 }
 
 /* SET 2,(REGISTER+dd) */
 func instrDDCB__SET_2_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, bytetemp|0x04)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, bytetemp|0x04)
 	z80.Q = 0
 }
 
 /* LD A,SET 2,(REGISTER+dd) */
 func instrDDCB__LD_A_SET_2_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr) | 0x04
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.A = z80.mRead(z80.tempaddr) | 0x04
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.A)
 	z80.Q = 0
 }
 
 /* LD B,SET 3,(REGISTER+dd) */
 func instrDDCB__LD_B_SET_3_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr) | 0x08
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.B = z80.mRead(z80.tempaddr) | 0x08
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.B)
 	z80.Q = 0
 }
 
 /* LD C,SET 3,(REGISTER+dd) */
 func instrDDCB__LD_C_SET_3_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr) | 0x08
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.C = z80.mRead(z80.tempaddr) | 0x08
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.C)
 	z80.Q = 0
 }
 
 /* LD D,SET 3,(REGISTER+dd) */
 func instrDDCB__LD_D_SET_3_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr) | 0x08
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.D = z80.mRead(z80.tempaddr) | 0x08
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.D)
 	z80.Q = 0
 }
 
 /* LD E,SET 3,(REGISTER+dd) */
 func instrDDCB__LD_E_SET_3_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr) | 0x08
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.E = z80.mRead(z80.tempaddr) | 0x08
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.E)
 	z80.Q = 0
 }
 
 /* LD H,SET 3,(REGISTER+dd) */
 func instrDDCB__LD_H_SET_3_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr) | 0x08
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.H = z80.mRead(z80.tempaddr) | 0x08
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.H)
 	z80.Q = 0
 }
 
 /* LD L,SET 3,(REGISTER+dd) */
 func instrDDCB__LD_L_SET_3_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr) | 0x08
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.L = z80.mRead(z80.tempaddr) | 0x08
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.L)
 	z80.Q = 0
 }
 
 /* SET 3,(REGISTER+dd) */
 func instrDDCB__SET_3_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, bytetemp|0x08)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, bytetemp|0x08)
 	z80.Q = 0
 }
 
 /* LD A,SET 3,(REGISTER+dd) */
 func instrDDCB__LD_A_SET_3_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr) | 0x08
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.A = z80.mRead(z80.tempaddr) | 0x08
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.A)
 	z80.Q = 0
 }
 
 /* LD B,SET 4,(REGISTER+dd) */
 func instrDDCB__LD_B_SET_4_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr) | 0x10
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.B = z80.mRead(z80.tempaddr) | 0x10
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.B)
 	z80.Q = 0
 }
 
 /* LD C,SET 4,(REGISTER+dd) */
 func instrDDCB__LD_C_SET_4_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr) | 0x10
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.C = z80.mRead(z80.tempaddr) | 0x10
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.C)
 	z80.Q = 0
 }
 
 /* LD D,SET 4,(REGISTER+dd) */
 func instrDDCB__LD_D_SET_4_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr) | 0x10
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.D = z80.mRead(z80.tempaddr) | 0x10
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.D)
 	z80.Q = 0
 }
 
 /* LD E,SET 4,(REGISTER+dd) */
 func instrDDCB__LD_E_SET_4_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr) | 0x10
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.E = z80.mRead(z80.tempaddr) | 0x10
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.E)
 	z80.Q = 0
 }
 
 /* LD H,SET 4,(REGISTER+dd) */
 func instrDDCB__LD_H_SET_4_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr) | 0x10
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.H = z80.mRead(z80.tempaddr) | 0x10
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.H)
 	z80.Q = 0
 }
 
 /* LD L,SET 4,(REGISTER+dd) */
 func instrDDCB__LD_L_SET_4_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr) | 0x10
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.L = z80.mRead(z80.tempaddr) | 0x10
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.L)
 	z80.Q = 0
 }
 
 /* SET 4,(REGISTER+dd) */
 func instrDDCB__SET_4_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, bytetemp|0x10)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, bytetemp|0x10)
 	z80.Q = 0
 }
 
 /* LD A,SET 4,(REGISTER+dd) */
 func instrDDCB__LD_A_SET_4_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr) | 0x10
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.A = z80.mRead(z80.tempaddr) | 0x10
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.A)
 	z80.Q = 0
 }
 
 /* LD B,SET 5,(REGISTER+dd) */
 func instrDDCB__LD_B_SET_5_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr) | 0x20
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.B = z80.mRead(z80.tempaddr) | 0x20
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.B)
 	z80.Q = 0
 }
 
 /* LD C,SET 5,(REGISTER+dd) */
 func instrDDCB__LD_C_SET_5_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr) | 0x20
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.C = z80.mRead(z80.tempaddr) | 0x20
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.C)
 	z80.Q = 0
 }
 
 /* LD D,SET 5,(REGISTER+dd) */
 func instrDDCB__LD_D_SET_5_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr) | 0x20
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.D = z80.mRead(z80.tempaddr) | 0x20
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.D)
 	z80.Q = 0
 }
 
 /* LD E,SET 5,(REGISTER+dd) */
 func instrDDCB__LD_E_SET_5_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr) | 0x20
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.E = z80.mRead(z80.tempaddr) | 0x20
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.E)
 	z80.Q = 0
 }
 
 /* LD H,SET 5,(REGISTER+dd) */
 func instrDDCB__LD_H_SET_5_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr) | 0x20
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.H = z80.mRead(z80.tempaddr) | 0x20
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.H)
 	z80.Q = 0
 }
 
 /* LD L,SET 5,(REGISTER+dd) */
 func instrDDCB__LD_L_SET_5_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr) | 0x20
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.L = z80.mRead(z80.tempaddr) | 0x20
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.L)
 	z80.Q = 0
 }
 
 /* SET 5,(REGISTER+dd) */
 func instrDDCB__SET_5_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, bytetemp|0x20)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, bytetemp|0x20)
 	z80.Q = 0
 }
 
 /* LD A,SET 5,(REGISTER+dd) */
 func instrDDCB__LD_A_SET_5_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr) | 0x20
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.A = z80.mRead(z80.tempaddr) | 0x20
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.A)
 	z80.Q = 0
 }
 
 /* LD B,SET 6,(REGISTER+dd) */
 func instrDDCB__LD_B_SET_6_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr) | 0x40
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.B = z80.mRead(z80.tempaddr) | 0x40
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.B)
 	z80.Q = 0
 }
 
 /* LD C,SET 6,(REGISTER+dd) */
 func instrDDCB__LD_C_SET_6_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr) | 0x40
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.C = z80.mRead(z80.tempaddr) | 0x40
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.C)
 	z80.Q = 0
 }
 
 /* LD D,SET 6,(REGISTER+dd) */
 func instrDDCB__LD_D_SET_6_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr) | 0x40
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.D = z80.mRead(z80.tempaddr) | 0x40
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.D)
 	z80.Q = 0
 }
 
 /* LD E,SET 6,(REGISTER+dd) */
 func instrDDCB__LD_E_SET_6_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr) | 0x40
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.E = z80.mRead(z80.tempaddr) | 0x40
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.E)
 	z80.Q = 0
 }
 
 /* LD H,SET 6,(REGISTER+dd) */
 func instrDDCB__LD_H_SET_6_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr) | 0x40
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.H = z80.mRead(z80.tempaddr) | 0x40
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.H)
 	z80.Q = 0
 }
 
 /* LD L,SET 6,(REGISTER+dd) */
 func instrDDCB__LD_L_SET_6_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr) | 0x40
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.L = z80.mRead(z80.tempaddr) | 0x40
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.L)
 	z80.Q = 0
 }
 
 /* SET 6,(REGISTER+dd) */
 func instrDDCB__SET_6_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, bytetemp|0x40)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, bytetemp|0x40)
 	z80.Q = 0
 }
 
 /* LD A,SET 6,(REGISTER+dd) */
 func instrDDCB__LD_A_SET_6_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr) | 0x40
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.A = z80.mRead(z80.tempaddr) | 0x40
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.A)
 	z80.Q = 0
 }
 
 /* LD B,SET 7,(REGISTER+dd) */
 func instrDDCB__LD_B_SET_7_iREGpDD(z80 *Z80) {
-	z80.B = z80.memory.Read(z80.tempaddr) | 0x80
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.B)
+	z80.B = z80.mRead(z80.tempaddr) | 0x80
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.B)
 	z80.Q = 0
 }
 
 /* LD C,SET 7,(REGISTER+dd) */
 func instrDDCB__LD_C_SET_7_iREGpDD(z80 *Z80) {
-	z80.C = z80.memory.Read(z80.tempaddr) | 0x80
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.C)
+	z80.C = z80.mRead(z80.tempaddr) | 0x80
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.C)
 	z80.Q = 0
 }
 
 /* LD D,SET 7,(REGISTER+dd) */
 func instrDDCB__LD_D_SET_7_iREGpDD(z80 *Z80) {
-	z80.D = z80.memory.Read(z80.tempaddr) | 0x80
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.D)
+	z80.D = z80.mRead(z80.tempaddr) | 0x80
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.D)
 	z80.Q = 0
 }
 
 /* LD E,SET 7,(REGISTER+dd) */
 func instrDDCB__LD_E_SET_7_iREGpDD(z80 *Z80) {
-	z80.E = z80.memory.Read(z80.tempaddr) | 0x80
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.E)
+	z80.E = z80.mRead(z80.tempaddr) | 0x80
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.E)
 	z80.Q = 0
 }
 
 /* LD H,SET 7,(REGISTER+dd) */
 func instrDDCB__LD_H_SET_7_iREGpDD(z80 *Z80) {
-	z80.H = z80.memory.Read(z80.tempaddr) | 0x80
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.H)
+	z80.H = z80.mRead(z80.tempaddr) | 0x80
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.H)
 	z80.Q = 0
 }
 
 /* LD L,SET 7,(REGISTER+dd) */
 func instrDDCB__LD_L_SET_7_iREGpDD(z80 *Z80) {
-	z80.L = z80.memory.Read(z80.tempaddr) | 0x80
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.L)
+	z80.L = z80.mRead(z80.tempaddr) | 0x80
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.L)
 	z80.Q = 0
 }
 
 /* SET 7,(REGISTER+dd) */
 func instrDDCB__SET_7_iREGpDD(z80 *Z80) {
-	var bytetemp byte = z80.memory.Read(z80.tempaddr)
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, bytetemp|0x80)
+	var bytetemp byte = z80.mRead(z80.tempaddr)
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, bytetemp|0x80)
 	z80.Q = 0
 }
 
 /* LD A,SET 7,(REGISTER+dd) */
 func instrDDCB__LD_A_SET_7_iREGpDD(z80 *Z80) {
-	z80.A = z80.memory.Read(z80.tempaddr) | 0x80
-	z80.AddTstates(1)
-	z80.memory.Write(z80.tempaddr, z80.A)
+	z80.A = z80.mRead(z80.tempaddr) | 0x80
+	z80.addTstates(1)
+	z80.mWrite(z80.tempaddr, z80.A)
 	z80.Q = 0
 }
